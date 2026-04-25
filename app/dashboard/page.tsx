@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import DashboardClient from "@/app/dashboard/DashboardClient";
-import type { Win } from "@/types";
+import type { Win, Artifact } from "@/types";
 
 const categoryColors: Record<string, string> = {
   "Deal Closed": "#10B981",
@@ -22,6 +22,14 @@ export default async function DashboardPage() {
     .select("*")
     .order("created_at", { ascending: false })
     .limit(50);
+
+  // Fetch vault artifacts for this user — non-archived, newest first
+  const { data: artifacts } = await supabase
+    .from("artifacts")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("archived", false)
+    .order("uploaded_at", { ascending: false });
 
   return (
     <div className="min-h-screen bg-[#080B14]">
@@ -46,8 +54,8 @@ export default async function DashboardPage() {
       </header>
 
       <div className="max-w-2xl mx-auto px-6 py-10 space-y-8">
-        {/* Interactive top section — WinLogger + FileUploader + BatchApproval */}
-        <DashboardClient />
+        {/* Interactive top section — wins + vault */}
+        <DashboardClient initialArtifacts={(artifacts ?? []) as Artifact[]} />
 
         {/* Win feed — server-rendered, refreshed by router.refresh() after saves */}
         <div>

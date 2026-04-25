@@ -5,9 +5,14 @@ import { useRouter } from "next/navigation";
 import WinLogger from "@/components/WinLogger";
 import FileUploader from "@/components/FileUploader";
 import BatchApproval from "@/components/BatchApproval";
-import type { FileExtractionResult } from "@/types";
+import VaultSection from "@/components/VaultSection";
+import type { FileExtractionResult, Artifact } from "@/types";
 
-export default function DashboardClient() {
+interface Props {
+  initialArtifacts: Artifact[];
+}
+
+export default function DashboardClient({ initialArtifacts }: Props) {
   const router = useRouter();
   const [results, setResults] = useState<FileExtractionResult[]>([]);
   const [savedBanner, setSavedBanner] = useState<number | null>(null);
@@ -19,7 +24,7 @@ export default function DashboardClient() {
   function handleSaved(count: number) {
     setResults([]);
     setSavedBanner(count);
-    // Re-run the server component — refreshes the win feed without a full reload
+    // Re-run the server component — refreshes wins and artifacts
     router.refresh();
     setTimeout(() => setSavedBanner(null), 4000);
   }
@@ -90,6 +95,9 @@ export default function DashboardClient() {
           onDismiss={handleDismiss}
         />
       )}
+
+      {/* Vault section — below wins logger */}
+      <VaultSection artifacts={initialArtifacts} />
     </div>
   );
 }

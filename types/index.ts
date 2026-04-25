@@ -1,3 +1,82 @@
+// ------------------------------------------------------------
+// Artifact types
+// ------------------------------------------------------------
+
+export type ArtifactType =
+  | "slide_deck"
+  | "customer_contract"
+  | "employment_contract"
+  | "comp_plan"
+  | "claude_skill"
+  | "other";
+
+// 'gated' is a reserved enum value — rejected with "coming soon" at the API.
+// Only 'private' and 'public' work in MVP.
+export type ArtifactVisibility = "private" | "public" | "gated";
+
+export type VerificationTier =
+  | "unverified"
+  | "verified"
+  | "vouched"           // Phase 2: peer/manager verified
+  | "system_verified";  // Phase 2: CRM integration
+
+export interface Artifact {
+  id: string;
+  user_id: string;
+  type: ArtifactType;
+  title: string | null;
+  description: string | null;       // AI-generated summary
+  why_it_matters: string | null;
+  source_file_path: string | null;
+  source_hash: string | null;
+  file_size: number | null;
+  mime_type: string | null;
+  extracted_metadata: Record<string, unknown> | null;
+  visibility: ArtifactVisibility;
+  featured: boolean;
+  archived: boolean;
+  parent_artifact_id: string | null;
+  created_at_company: string | null;
+  used_at_companies: string[];
+  uploaded_at: string;
+  // Computed in queries (not stored columns)
+  version_count?: number;
+  linked_wins_count?: number;
+}
+
+// Per-field confidence returned by AI extraction
+export type FieldConfidence = "high" | "medium" | "low";
+
+// AI-extracted metadata for a slide deck
+export interface ExtractedArtifactData {
+  title: string;
+  summary: string;
+  why_it_matters: string;
+  created_at_company: string | null;
+  used_at_companies: string[];
+  confidence: {
+    title: FieldConfidence;
+    summary: FieldConfidence;
+    why_it_matters: FieldConfidence;
+    created_at_company: FieldConfidence;
+    used_at_companies: FieldConfidence;
+  };
+}
+
+// Response from POST /api/artifacts/upload
+export interface ArtifactUploadResult {
+  extracted: ExtractedArtifactData;
+  source_file: string;
+  source_hash: string;
+  file_size: number;
+  mime_type: string;
+  similar_artifacts: Pick<Artifact, "id" | "title" | "type" | "created_at_company" | "uploaded_at">[];
+}
+
+// ------------------------------------------------------------
+// Win category types
+// ------------------------------------------------------------
+
 export type WinCategory =
   | "Deal Closed"
   | "Recognition"
@@ -64,6 +143,7 @@ export interface WinAnnotation {
 // wins_with_edit_status view
 export interface WinWithEditStatus extends Win {
   has_version_history: boolean;
+  verification_tier: VerificationTier;
 }
 
 // Shape returned by all file extractors — ready for batch approval UI
