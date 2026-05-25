@@ -1,26 +1,50 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
+  const [code, setCode] = useState("");
+  const [step, setStep] = useState<"email" | "code">("email");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Step 1 — send OTP to email (no emailRedirectTo = 6-digit code, not a link)
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
     const supabase = createClient();
-    await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-    setSent(true);
+    const { error } = await supabase.auth.signInWithOtp({ email });
     setLoading(false);
+    if (error) {
+      setError(error.message);
+    } else {
+      setStep("code");
+    }
+  };
+
+  // Step 2 — verify 6-digit code
+  const handleCodeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    const supabase = createClient();
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token: code.trim(),
+      type: "email",
+    });
+    setLoading(false);
+    if (error) {
+      setError("Invalid or expired code. Try again.");
+    } else {
+      router.push("/dashboard");
+    }
   };
 
   return (
@@ -32,36 +56,93 @@ export default function LoginPage() {
           </span>
         </Link>
 
-        <div className="rounded-2xl p-8"
-          style={{ background: "linear-gradient(160deg,#0E1628 0%,#080B14 100%)", border: "1px solid rgba(255,255,255,0.08)" }}>
-          {!sent ? (
+        <div
+          className="rounded-2xl p-8"
+          style={{
+            background: "linear-gradient(160deg,#0E1628 0%,#080B14 100%)",
+            border: "1px solid rgba(255,255,255,0.08)",
+          }}
+        >
+          {step === "email" ? (
             <>
               <h1 className="text-xl font-bold text-[#F8F4EC] mb-2">Sign in</h1>
-              <p className="text-sm text-[#6B7280] mb-6">We&rsquo;ll send a magic link to your email.</p>
+              <p className="text-sm text-[#6B7280] mb-6">
+                We&rsquo;ll email you a 6-digit code to sign in.
+              </p>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleEmailSubmit} className="space-y-4">
                 <input
-                  type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com" required
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  required
                   className="w-full px-4 py-3 rounded-xl text-sm text-[#F8F4EC] placeholder-[#4B5563] focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/40"
-                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+                  style={{
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                  }}
                 />
-                <button type="submit" disabled={loading}
+                {error && <p className="text-sm text-red-400">{error}</p>}
+                <button
+                  type="submit"
+                  disabled={loading}
                   className="w-full py-3 rounded-xl text-sm font-bold transition-all hover:opacity-90 disabled:opacity-50"
-                  style={{ background: "linear-gradient(135deg,#F59E0B 0%,#FCD34D 100%)", color: "#080B14" }}>
-                  {loading ? "Sending..." : "Send magic link →"}
+                  style={{
+                    background: "linear-gradient(135deg,#F59E0B 0%,#FCD34D 100%)",
+                    color: "#080B14",
+                  }}
+                >
+                  {loading ? "Sending..." : "Send code →"}
                 </button>
               </form>
             </>
           ) : (
-            <div className="text-center py-4">
-              <div className="text-3xl mb-4">✉️</div>
-              <h2 className="text-lg font-bold text-[#F8F4EC] mb-2">Check your email</h2>
-              <p className="text-sm text-[#6B7280]">
-                We sent a magic link to <span className="text-[#F8F4EC]">{email}</span>.
-                Click it to sign in.
+            <>
+              <h1 className="text-xl font-bold text-[#F8F4EC] mb-2">Enter your code</h1>
+              <p className="text-sm text-[#6B7280] mb-6">
+                We sent a 6-digit code to{" "}
+                <span className="text-[#F8F4EC]">{email}</span>.
               </p>
-            </div>
+
+              <form onSubmit={handleCodeSubmit} className="space-y-4">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="\d{6}"
+                  maxLength={6}
+                  value={code}
+                  onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+                  placeholder="000000"
+                  required
+                  autoFocus
+                  className="w-full px-4 py-3 rounded-xl text-sm text-[#F8F4EC] placeholder-[#4B5563] focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/40 tracking-[0.5em] text-center font-mono"
+                  style={{
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                  }}
+                />
+                {error && <p className="text-sm text-red-400">{error}</p>}
+                <button
+                  type="submit"
+                  disabled={loading || code.length !== 6}
+                  className="w-full py-3 rounded-xl text-sm font-bold transition-all hover:opacity-90 disabled:opacity-50"
+                  style={{
+                    background: "linear-gradient(135deg,#F59E0B 0%,#FCD34D 100%)",
+                    color: "#080B14",
+                  }}
+                >
+                  {loading ? "Verifying..." : "Sign in →"}
+                </button>
+              </form>
+
+              <button
+                onClick={() => { setStep("email"); setCode(""); setError(""); }}
+                className="mt-4 w-full text-xs text-[#6B7280] hover:text-[#F8F4EC] transition-colors"
+              >
+                Use a different email
+              </button>
+            </>
           )}
         </div>
       </div>
