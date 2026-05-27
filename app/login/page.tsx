@@ -37,11 +37,11 @@ export default function LoginPage() {
     const { error } = await supabase.auth.verifyOtp({
       email,
       token: code.trim(),
-      type: "email",
+      type: "magiclink",
     });
     setLoading(false);
     if (error) {
-      setError("Invalid or expired code. Try again.");
+      setError(error.message);
     } else {
       router.push("/dashboard");
     }
