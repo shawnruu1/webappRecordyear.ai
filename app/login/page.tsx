@@ -37,7 +37,7 @@ export default function LoginPage() {
     const { error } = await supabase.auth.verifyOtp({
       email,
       token: code.trim(),
-      type: "magiclink",
+      type: "email",
     });
     setLoading(false);
     if (error) {
@@ -67,7 +67,7 @@ export default function LoginPage() {
             <>
               <h1 className="text-xl font-bold text-[#F8F4EC] mb-2">Sign in</h1>
               <p className="text-sm text-[#6B7280] mb-6">
-                We&rsquo;ll email you a 6-digit code to sign in.
+                We&rsquo;ll email you a sign-in code.
               </p>
 
               <form onSubmit={handleEmailSubmit} className="space-y-4">
@@ -101,7 +101,7 @@ export default function LoginPage() {
             <>
               <h1 className="text-xl font-bold text-[#F8F4EC] mb-2">Enter your code</h1>
               <p className="text-sm text-[#6B7280] mb-6">
-                We sent a 6-digit code to{" "}
+                We sent a sign-in code to{" "}
                 <span className="text-[#F8F4EC]">{email}</span>.
               </p>
 
@@ -109,11 +109,11 @@ export default function LoginPage() {
                 <input
                   type="text"
                   inputMode="numeric"
-                  pattern="\d{6}"
-                  maxLength={6}
+                  pattern="\d{8}"
+                  maxLength={8}
                   value={code}
                   onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-                  placeholder="000000"
+                  placeholder="00000000"
                   required
                   autoFocus
                   className="w-full px-4 py-3 rounded-xl text-sm text-[#F8F4EC] placeholder-[#4B5563] focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/40 tracking-[0.5em] text-center font-mono"
@@ -125,7 +125,7 @@ export default function LoginPage() {
                 {error && <p className="text-sm text-red-400">{error}</p>}
                 <button
                   type="submit"
-                  disabled={loading || code.length !== 6}
+                  disabled={loading || code.length !== 8}
                   className="w-full py-3 rounded-xl text-sm font-bold transition-all hover:opacity-90 disabled:opacity-50"
                   style={{
                     background: "linear-gradient(135deg,#F59E0B 0%,#FCD34D 100%)",
