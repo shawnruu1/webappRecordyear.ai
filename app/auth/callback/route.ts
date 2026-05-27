@@ -1,6 +1,3 @@
-// Auth is now OTP-based and verified client-side via supabase.auth.verifyOtp().
-// This route is kept as a safe fallback in case a code-based URL is ever issued
-// (e.g. server-side flows or Supabase dashboard password resets).
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
@@ -26,9 +23,7 @@ export async function GET(request: Request) {
       }
     );
     await supabase.auth.exchangeCodeForSession(code);
-    return NextResponse.redirect(`${origin}/dashboard`);
   }
 
-  // No code param — redirect to login
-  return NextResponse.redirect(`${origin}/login`);
+  return NextResponse.redirect(`${origin}/dashboard`);
 }
