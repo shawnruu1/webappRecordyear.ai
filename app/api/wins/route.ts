@@ -26,6 +26,8 @@ export async function POST(request: Request) {
       category: w.category,
       tags: w.tags,
       impact: w.impact,
+      arr_amount: w.arr_amount,
+      happened_at: w.happened_at,
       verification: { source: "self" },
     }));
 

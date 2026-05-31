@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { ExtractedWinRecord, WinCategory } from "@/types";
 import { WIN_CATEGORIES } from "@/types";
+import { buildWinExtractionPrompt } from "@/lib/ai/buildExtractionPrompt";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -16,31 +17,6 @@ function isSupportedImageType(
   mimeType: string
 ): mimeType is SupportedImageMediaType {
   return SUPPORTED_TYPES.includes(mimeType as SupportedImageMediaType);
-}
-
-function buildPrompt(): string {
-  return `You are a career record assistant for sales professionals. Analyze this image and extract every distinct professional win, achievement, or milestone you can find.
-
-A "win" is any evidence of professional success: a closed deal, a quota hit, a recognition, a skill milestone, a relationship built, a promotion, a contract signed, etc.
-
-REVENUE FORMATTING RULES — follow exactly:
-- If the source shows MRR (monthly recurring revenue), calculate ARR = MRR × 12 and use ARR in the title and impact line. Format as "$X ARR" (e.g. "$21,792 ARR").
-- If the source already shows ARR, ACV, or an annual contract value, use that figure directly — do not multiply.
-- Always preserve the original MRR figure in raw_excerpt so the source is auditable.
-- Never use "MRR" in a title or impact line — always convert to and display ARR.
-
-For each win found, return a JSON object with exactly these fields:
-- title: concise title, max 60 characters, using ARR not MRR
-- category: one of ${WIN_CATEGORIES.map((c) => `"${c}"`).join(", ")}
-- impact: one sentence describing the business or career impact, using ARR not MRR
-- tags: array of 2-5 relevant keywords
-- arr_amount: the ARR as a plain integer with no symbols or commas (e.g. 21792 for $21,792 ARR). Apply MRR × 12 before setting this value. If there is no revenue figure, use null.
-- happened_at: ISO date string if a date is visible, otherwise null
-- raw_excerpt: the specific text from the source including the original MRR figure
-- confidence: "high" if clearly visible, "medium" if inferred, "low" if uncertain
-
-Return a JSON array of win objects. If no wins are found, return an empty array [].
-No markdown, no code fences, no explanation — only the JSON array.`;
 }
 
 function parseResponse(raw: string): ExtractedWinRecord[] {
@@ -123,7 +99,7 @@ export async function extractWinsFromImage(
           },
           {
             type: "text",
-            text: buildPrompt(),
+            text: buildWinExtractionPrompt({ sourceType: "image" }),
           },
         ],
       },
