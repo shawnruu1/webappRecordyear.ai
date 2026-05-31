@@ -106,6 +106,60 @@ Every win record carries a verification level. Show this clearly in the UI.
 
 MVP ships Tier 3 and Tier 4. Tiers 1 and 2 are Phase 2.
 
+## Product philosophy — evidence over claims
+
+### Three user motions, three trust profiles
+
+RecordYear supports three distinct ways a user adds records:
+
+1. **Real-time capture.** User just had the win and logs it immediately — artifact-first (CRM screenshot, contract, slide deck, recognition email). High trust by default. This is the flywheel motion.
+2. **Backfill.** User adds wins from past career where no artifact exists or is no longer accessible — quick note / self-reported, explicitly labeled. This is the onboarding motion that lets users build a profile with real career depth on day one.
+3. **Verification upgrade.** User attaches an artifact to an existing record, upgrading its verification tier. This is the trust-building motion that lets profiles get more credible over time.
+
+The product must support all three. Killing text-paste would kill backfill. Making everything text-paste would kill trust.
+
+### Artifact-first as default
+
+The primary input UI is drag-and-drop / screenshot-paste for artifacts (screenshots, PDFs, docs, slides). Quick-note text entry is the secondary, smaller path — explicitly framed as the escape hatch for moments where no artifact exists.
+
+This framing teaches users what RecordYear is: a place where evidence of your career lives, with a release valve for moments evidence doesn't exist yet.
+
+### Verification spectrum (revised)
+
+The earlier four-tier numbering system is replaced with a more honest named spectrum:
+
+| Tier | What it proves |
+|------|----------------|
+| Self-reported | User claimed it. No evidence. |
+| Artifact-attached | User uploaded an image/PDF. AI parsed it. Could be fabricated. |
+| Cryptographically verified | Artifact carries a signature (DocuSign, Stripe, email DKIM). Hard to fake. |
+| System-verified | Pulled directly from source system via API (CRM, payroll, etc.). Source of truth. |
+| Vouched | Modifier on any tier. Another verified user confirmed the record. |
+
+**Critical naming decision:** the word _verified_ is reserved for tiers where verification is actually happening (cryptographic, system-verified). Screenshot uploads are labeled _artifact-attached_, not _artifact-verified_. This protects the brand from a credibility cliff — screenshots can be fabricated, and overclaiming would crack the trust narrative.
+
+### Time-of-entry context matters
+
+Every record carries both `happened_at` (when the event occurred) and `created_at` (when it was logged in RecordYear). The gap between these reveals whether a record is real-time or backfilled. A 6-year-old self-reported record reads differently than a yesterday self-reported record. The verification UI surfaces both dates so viewers can pattern-match honestly.
+
+### Mutual vouching as viral mechanic (post-v1, requires network density)
+
+When a user logs a deal, RecordYear prompts them to tag collaborators by defined role: BDR, Sales Engineer, Manager, Champion at customer, Partner, Mentor. Each tagged collaborator receives a vouch request — confirm involvement, get credited on the record. Vouching becomes part of both users' career evidence.
+
+**Strategic significance:** vouching is the strongest viral mechanic in the product. Every win logged generates 2–5 vouch invitations. Each invitation is a user-acquisition event tied to real value (the invitee gets credited on a real deal). Asymmetric incentives mean both sides benefit — unlike LinkedIn endorsements, which had no value asymmetry and devolved into noise.
+
+**Game-theoretic property:** solo fabrication is easy, conspiracies of two are harder, conspiracies of three or four are very hard. Requiring multiple vouchers for highest-trust records means gaming requires multi-party collusion among people who all have their own profiles to protect.
+
+**Sequencing constraint:** vouching requires network density — meaningfully useful around 300–500 active users, real growth engine around 1,000–2,000. Until then the product runs in single-player mode (self-reported + artifact-attached, no vouching). This is sequencing, not a problem. Ship single-player first.
+
+### Strategic implication of the full system
+
+RecordYear is not "a place to log wins." That competes with notes apps, journals, spreadsheets — free alternatives everywhere. RecordYear is "the place where evidence of a career lives." That competes with nothing. LinkedIn has no artifacts. Resumes are summaries, not evidence. Portfolio sites exist for designers and engineers but not for salespeople or other non-creative professionals.
+
+The artifact-first input, the honest verification labeling, the vouching mechanic, the share cards — all get sharper when the underlying record is artifact-backed and honestly labeled. A profile that is 100% self-reported with all-recent dates looks suspicious. A profile that is self-reported-for-history, artifact-attached-for-recent, and system-verified-where-CRM-connected looks like exactly what you'd expect from a real career.
+
+The verification labels are not a wall. They are a lens. Different records get different scrutiny based on the evidence available, and the user builds trust over time by adding evidence as it accumulates.
+
 ## Code Conventions
 
 Keep it simple. If a new technical co-founder opens this repo, they should understand every file in 10 minutes. Complexity is a liability. Clarity is the asset.
