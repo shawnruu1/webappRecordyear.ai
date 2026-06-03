@@ -1,19 +1,70 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import PortfolioClient from "@/app/portfolio/[userId]/PortfolioClient";
+import PortfolioFilterBar from "@/components/PortfolioFilterBar";
 import { deriveVerificationTier } from "@/lib/verification";
-import type { WinWithEditStatus, WinVersion } from "@/types";
+import {
+  parseCategoryParam,
+  parsePeriodParam,
+  resolvePeriod,
+  FILTER_CATEGORY_ORDER,
+  DEFAULT_PERIOD,
+} from "@/lib/portfolioFilters";
+import type { WinWithEditStatus, WinVersion, WinCategory } from "@/types";
 
-export default async function PortfolioPage({ params }: { params: Promise<{ userId: string }> }) {
+export default async function PortfolioPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ userId: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const { userId } = await params;
+  const sp = await searchParams;
   const supabase = await createClient();
 
-  // Query the view so each win carries has_version_history
-  const { data: wins, error } = await supabase
+  // ---- Parse filters from the URL (the source of truth) ----
+  const rawCategory = Array.isArray(sp.category) ? sp.category[0] : sp.category;
+  const rawPeriod = Array.isArray(sp.period) ? sp.period[0] : sp.period;
+  const activeCategories = parseCategoryParam(rawCategory);
+  const activePeriod = parsePeriodParam(rawPeriod);
+  const range = resolvePeriod(activePeriod);
+  const filtersActive =
+    activeCategories.length > 0 || activePeriod !== DEFAULT_PERIOD;
+
+  // ---- Chip counts: per-category totals across ALL the user's records,
+  // independent of the active filter ("what's available if you toggle"). ----
+  const { data: allCategories } = await supabase
+    .from("wins")
+    .select("category")
+    .eq("user_id", userId);
+
+  const categoryCounts = FILTER_CATEGORY_ORDER.reduce(
+    (acc, c) => ({ ...acc, [c]: 0 }),
+    {} as Record<WinCategory, number>
+  );
+  for (const row of (allCategories ?? []) as { category: WinCategory | null }[]) {
+    if (row.category && row.category in categoryCounts) {
+      categoryCounts[row.category]++;
+    }
+  }
+
+  // ---- Filtered records: WHERE clauses added in the data layer ----
+  let query = supabase
     .from("wins_with_edit_status")
     .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+    .eq("user_id", userId);
+
+  if (activeCategories.length > 0) {
+    query = query.in("category", activeCategories);
+  }
+  if (range) {
+    query = query.gte("happened_at", range.start);
+    if (range.end) query = query.lt("happened_at", range.end);
+  }
+  query = query.order("created_at", { ascending: false });
+
+  const { data: wins, error } = await query;
 
   if (error || !wins) notFound();
 
@@ -68,7 +119,17 @@ export default async function PortfolioPage({ params }: { params: Promise<{ user
           <p className="text-sm text-[#6B7280]">{summary}</p>
         </div>
 
-        <PortfolioClient wins={typedWins} versionsByWin={versionsByWin} />
+        <PortfolioFilterBar
+          categoryCounts={categoryCounts}
+          activeCategories={activeCategories}
+          activePeriod={activePeriod}
+        />
+
+        <PortfolioClient
+          wins={typedWins}
+          versionsByWin={versionsByWin}
+          filtersActive={filtersActive}
+        />
 
         <div
           className="mt-16 pt-8 border-t text-center"

@@ -32,18 +32,27 @@ const FIELD_LABELS: Record<string, string> = {
 interface Props {
   wins: WinWithEditStatus[];
   versionsByWin: Record<string, WinVersion[]>;
+  filtersActive?: boolean;
 }
 
 // ------------------------------------------------------------
 // Component
 // ------------------------------------------------------------
-export default function PortfolioClient({ wins, versionsByWin }: Props) {
+export default function PortfolioClient({
+  wins,
+  versionsByWin,
+  filtersActive = false,
+}: Props) {
   const [openChangelog, setOpenChangelog] = useState<string | null>(null);
 
   if (wins.length === 0) {
     return (
       <div className="text-center py-20">
-        <p className="text-[#374151]">No wins recorded yet.</p>
+        <p className="text-[#374151]">
+          {filtersActive
+            ? "No records match these filters."
+            : "No wins recorded yet."}
+        </p>
       </div>
     );
   }
