@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { ExtractedWinRecord, WinCategory } from "@/types";
-import { WIN_CATEGORIES } from "@/types";
+import type { ExtractedWinRecord, WinCategory, UserRole } from "@/types";
+import { WIN_CATEGORIES, DEFAULT_USER_ROLE } from "@/types";
 import { buildWinExtractionPrompt } from "@/lib/ai/buildExtractionPrompt";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -15,8 +15,22 @@ const FALLBACK = (raw_input: string): ExtractedWinRecord[] => [
     happened_at: null,
     raw_excerpt: "",
     confidence: "low",
+    role_context: null,
   },
 ];
+
+// role_context is a free-form bag — accept any plain JSON object, else null.
+function normalizeRoleContext(value: unknown): Record<string, unknown> | null {
+  if (
+    value &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    Object.keys(value as Record<string, unknown>).length > 0
+  ) {
+    return value as Record<string, unknown>;
+  }
+  return null;
+}
 
 function parseResponse(raw: string): ExtractedWinRecord[] {
   const cleaned = raw.replace(/```(?:json)?\n?/g, "").trim();
@@ -64,12 +78,16 @@ function normalizeRecord(item: Record<string, unknown>): ExtractedWinRecord {
       item.confidence === "high" || item.confidence === "low"
         ? item.confidence
         : "medium",
+    role_context: normalizeRoleContext(item.role_context),
   };
 }
 
-export async function extractWins(raw_input: string): Promise<ExtractedWinRecord[]> {
+export async function extractWins(
+  raw_input: string,
+  userRole: UserRole = DEFAULT_USER_ROLE
+): Promise<ExtractedWinRecord[]> {
   try {
-    const prompt = buildWinExtractionPrompt({ sourceType: "text" });
+    const prompt = buildWinExtractionPrompt({ sourceType: "text", userRole });
 
     const message = await anthropic.messages.create({
       model: "claude-sonnet-4-6",

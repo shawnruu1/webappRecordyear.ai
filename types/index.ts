@@ -92,6 +92,40 @@ export const WIN_CATEGORIES: WinCategory[] = [
   "Relationship",
 ];
 
+// ------------------------------------------------------------
+// User role types
+// ------------------------------------------------------------
+// Stored on profiles.role. The KEY is persisted (not the UI label),
+// and drives role-aware extraction in lib/ai/buildExtractionPrompt.ts.
+
+export type UserRole =
+  | "salesperson"
+  | "lawyer"
+  | "project_manager"
+  | "engineer"
+  | "consultant"
+  | "other";
+
+export const DEFAULT_USER_ROLE: UserRole = "salesperson";
+
+// Signup dropdown: display label -> stored role key.
+export const ROLE_OPTIONS: { label: string; value: UserRole }[] = [
+  { label: "Sales", value: "salesperson" },
+  { label: "Legal", value: "lawyer" },
+  { label: "Project Management", value: "project_manager" },
+  { label: "Engineering", value: "engineer" },
+  { label: "Consulting", value: "consultant" },
+  { label: "Other", value: "other" },
+];
+
+// profiles row — one per auth user
+export interface Profile {
+  id: string; // == auth.users.id
+  role: UserRole | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export type VerificationSource = "artifact" | "self_reported";
 
 export interface WinVerification {
@@ -116,6 +150,9 @@ export interface Win {
   happened_at: string | null;
   recorded_at: string | null;
   arr_amount: number | null; // ARR as integer — added in migration 20260419b
+  // Role-specific fields the AI surfaces but the UI doesn't yet render.
+  // Background metadata only — visible categories are unaffected.
+  role_context: Record<string, unknown> | null; // added in migration 20260603
 }
 
 // win_versions row — immutable audit trail for artifact-backed edits
@@ -156,6 +193,10 @@ export interface ExtractedWinRecord {
   happened_at: string | null; // ISO date string if detectable, else null
   raw_excerpt: string; // The text/region Claude pulled this from
   confidence: "high" | "medium" | "low";
+  // Optional role-specific fields (salesperson: acv/quota; lawyer:
+  // billable_hours/case_status; etc.). Populated by role-aware text
+  // extraction; absent from image/PDF extractors for now.
+  role_context?: Record<string, unknown> | null;
 }
 
 // Per-file extraction result — wraps records + status for the UI

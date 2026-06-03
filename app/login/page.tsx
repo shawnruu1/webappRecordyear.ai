@@ -3,12 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { ROLE_OPTIONS, DEFAULT_USER_ROLE } from "@/types";
+import type { UserRole } from "@/types";
 import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
+  const [role, setRole] = useState<UserRole>(DEFAULT_USER_ROLE);
   const [step, setStep] = useState<"email" | "code">("email");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -34,17 +37,31 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
     const supabase = createClient();
-    const { error } = await supabase.auth.verifyOtp({
+    const { data, error } = await supabase.auth.verifyOtp({
       email,
       token: code.trim(),
       type: "email",
     });
-    setLoading(false);
+
     if (error) {
+      setLoading(false);
       setError(error.message);
-    } else {
-      router.push("/dashboard");
+      return;
     }
+
+    // Capture role once at signup. ignoreDuplicates leaves an existing
+    // profile (returning user) untouched — only first sign-in writes it.
+    if (data.user) {
+      await supabase
+        .from("profiles")
+        .upsert(
+          { id: data.user.id, role },
+          { onConflict: "id", ignoreDuplicates: true }
+        );
+    }
+
+    setLoading(false);
+    router.push("/dashboard");
   };
 
   return (
@@ -83,6 +100,34 @@ export default function LoginPage() {
                     border: "1px solid rgba(255,255,255,0.1)",
                   }}
                 />
+                <div>
+                  <label
+                    htmlFor="role"
+                    className="block text-xs text-[#6B7280] mb-1.5"
+                  >
+                    What best describes your work?
+                  </label>
+                  <select
+                    id="role"
+                    value={role}
+                    onChange={(e) => setRole(e.target.value as UserRole)}
+                    className="w-full px-4 py-3 rounded-xl text-sm text-[#F8F4EC] focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/40 appearance-none"
+                    style={{
+                      background: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                    }}
+                  >
+                    {ROLE_OPTIONS.map((opt) => (
+                      <option
+                        key={opt.value}
+                        value={opt.value}
+                        className="bg-[#0E1628] text-[#F8F4EC]"
+                      >
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 {error && <p className="text-sm text-red-400">{error}</p>}
                 <button
                   type="submit"
