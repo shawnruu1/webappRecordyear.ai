@@ -3,38 +3,8 @@
 import { useState } from "react";
 import type { WinWithEditStatus, WinVersion, WinCategory } from "@/types";
 import { deriveVerificationTier } from "@/lib/verification";
+import { timeContext } from "@/lib/recordDisplay";
 import VerificationBadge from "@/components/VerificationBadge";
-
-// ------------------------------------------------------------
-// Time-of-entry helpers
-// ------------------------------------------------------------
-// When a record was logged long after it happened (backfill), show
-// both dates so a viewer can pattern-match honestly. Real-time entries
-// (happened ≈ logged) show a single date. This is the "time-of-entry
-// context matters" principle made visible.
-const BACKFILL_GAP_MS = 45 * 24 * 60 * 60 * 1000; // ~45 days
-
-function monthYear(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-US", {
-    month: "short",
-    year: "numeric",
-  });
-}
-
-function timeContext(win: WinWithEditStatus): string {
-  const logged = win.created_at;
-  const happened = win.happened_at;
-  if (happened) {
-    const gap = Math.abs(
-      new Date(logged).getTime() - new Date(happened).getTime()
-    );
-    if (gap > BACKFILL_GAP_MS) {
-      return `Happened ${monthYear(happened)} · Logged ${monthYear(logged)}`;
-    }
-    return monthYear(happened);
-  }
-  return monthYear(logged);
-}
 
 // ------------------------------------------------------------
 // Config

@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import DashboardClient from "@/app/dashboard/DashboardClient";
+import VisibilityToggle from "@/components/VisibilityToggle";
+import UsernameClaim from "@/components/UsernameClaim";
 import type { Win, Artifact } from "@/types";
 
 const categoryColors: Record<string, string> = {
@@ -31,6 +33,13 @@ export default async function DashboardPage() {
     .eq("archived", false)
     .order("uploaded_at", { ascending: false });
 
+  // Profile — drives the username-claim prompt / public-link state.
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("username, display_name, public_profile_enabled")
+    .eq("id", user.id)
+    .maybeSingle();
+
   return (
     <div className="min-h-screen bg-[#080B14]">
       {/* Header */}
@@ -54,6 +63,12 @@ export default async function DashboardPage() {
       </header>
 
       <div className="max-w-2xl mx-auto px-6 py-10 space-y-8">
+        {/* Public profile — claim prompt or live link */}
+        <UsernameClaim
+          initialUsername={profile?.username ?? null}
+          initialDisplayName={profile?.display_name ?? null}
+        />
+
         {/* Interactive top section — wins + vault */}
         <DashboardClient initialArtifacts={(artifacts ?? []) as Artifact[]} />
 
@@ -150,13 +165,16 @@ export default async function DashboardPage() {
                       </div>
                     )}
 
-                    <p className="text-[10px] text-[#374151] mt-2">
-                      {new Date(win.created_at).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </p>
+                    <div className="flex items-center justify-between gap-2 mt-3">
+                      <p className="text-[10px] text-[#374151]">
+                        {new Date(win.created_at).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </p>
+                      <VisibilityToggle winId={win.id} initial={win.visibility} />
+                    </div>
                   </div>
                 );
               })}

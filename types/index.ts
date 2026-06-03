@@ -188,6 +188,10 @@ export const ROLE_OPTIONS: { label: string; value: UserRole }[] = [
 export interface Profile {
   id: string; // == auth.users.id
   role: UserRole | null;
+  // Public profile (added in migration 20260603_public_profiles)
+  username: string | null; // URL slug, unique, case-insensitive
+  display_name: string | null; // human-facing name on the public page
+  public_profile_enabled: boolean; // does /[username] resolve at all
   created_at: string;
   updated_at: string;
 }
@@ -198,6 +202,15 @@ export interface WinVerification {
   source: VerificationSource;
   ref_id?: string; // Supabase Storage path for artifact-backed wins
 }
+
+// Per-record public visibility — private by default, explicit opt-in.
+export type RecordVisibility = "private" | "blurred_public" | "full_public";
+
+export const RECORD_VISIBILITIES: RecordVisibility[] = [
+  "private",
+  "blurred_public",
+  "full_public",
+];
 
 export interface Win {
   id: string;
@@ -219,6 +232,7 @@ export interface Win {
   // Role-specific fields the AI surfaces but the UI doesn't yet render.
   // Background metadata only — visible categories are unaffected.
   role_context: Record<string, unknown> | null; // added in migration 20260603
+  visibility: RecordVisibility; // public opt-in — added in migration 20260603
 }
 
 // win_versions row — immutable audit trail for artifact-backed edits
@@ -297,4 +311,37 @@ export interface BatchRecord {
   sourceFileName: string; // Display name
   source_file: string; // Supabase Storage path
   source_hash: string; // SHA-256 hex of the original file
+}
+
+// ------------------------------------------------------------
+// Public profile read model — shape returned by get_public_profile().
+// Redaction already happened in SQL; these are the post-redaction
+// fields the public route renders. Raw company names / exact ARR for
+// blurred records never reach this layer.
+// ------------------------------------------------------------
+
+export interface PublicProfileRecord {
+  id: string;
+  category: WinCategory | null;
+  visibility: Exclude<RecordVisibility, "private">; // private rows excluded
+  title: string;
+  impact: string;
+  tags: string[];
+  arr_amount: number | null; // full_public only; null when blurred
+  arr_range: string | null; // blurred only; null when full_public
+  happened_at: string | null;
+  created_at: string;
+  // Provenance signals — real for both tiers, fed to deriveVerificationTier.
+  verification_source: string | null;
+  has_source_file: boolean;
+  has_linked_artifact: boolean;
+}
+
+export interface PublicProfilePayload {
+  profile: {
+    username: string;
+    display_name: string | null;
+    role: UserRole | null;
+  };
+  records: PublicProfileRecord[];
 }
