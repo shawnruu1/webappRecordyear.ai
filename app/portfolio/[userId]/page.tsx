@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import PortfolioClient from "@/app/portfolio/[userId]/PortfolioClient";
+import { deriveVerificationTier } from "@/lib/verification";
 import type { WinWithEditStatus, WinVersion } from "@/types";
 
 export default async function PortfolioPage({ params }: { params: Promise<{ userId: string }> }) {
@@ -17,6 +18,23 @@ export default async function PortfolioPage({ params }: { params: Promise<{ user
   if (error || !wins) notFound();
 
   const typedWins = wins as WinWithEditStatus[];
+
+  // Honest header math — count evidence-backed vs bare self-reported.
+  // "with evidence" is the softened public term for artifact_attached
+  // and the stronger tiers; the precise tier labels live in the model.
+  const total = typedWins.length;
+  const withEvidence = typedWins.filter(
+    (w) => deriveVerificationTier(w).tier !== "self_reported"
+  ).length;
+  const selfReported = total - withEvidence;
+
+  const summary = [
+    `${total} ${total === 1 ? "record" : "records"}`,
+    withEvidence > 0 ? `${withEvidence} with evidence` : null,
+    selfReported > 0 ? `${selfReported} self-reported` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   // Fetch version history only for wins that have it — one round-trip
   const editedWinIds = typedWins
@@ -47,9 +65,7 @@ export default async function PortfolioPage({ params }: { params: Promise<{ user
             Record<span style={{ color: "#F59E0B" }}>Year</span>
           </span>
           <h1 className="text-3xl font-bold text-[#F8F4EC] mt-6 mb-2">Career Record</h1>
-          <p className="text-sm text-[#6B7280]">
-            {typedWins.length} verified wins · Built with RecordYear.ai
-          </p>
+          <p className="text-sm text-[#6B7280]">{summary}</p>
         </div>
 
         <PortfolioClient wins={typedWins} versionsByWin={versionsByWin} />

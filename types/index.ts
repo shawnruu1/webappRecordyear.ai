@@ -14,11 +14,77 @@ export type ArtifactType =
 // Only 'private' and 'public' work in MVP.
 export type ArtifactVisibility = "private" | "public" | "gated";
 
+// ------------------------------------------------------------
+// Verification spectrum — honest, named tiers.
+// ------------------------------------------------------------
+// The word "verified" is reserved for tiers where verification is
+// actually happening (cryptographic, system). Screenshot/PDF uploads
+// are "artifact_attached" — evidence on file, but fabricable. This
+// protects the trust narrative from a credibility cliff.
+//
+// Phase 1 reachable: self_reported, artifact_attached.
+// Phase 2 (modeled, not yet reachable): cryptographically_verified
+// (DocuSign/Stripe/DKIM signature), system_verified (CRM/payroll API).
 export type VerificationTier =
-  | "unverified"
-  | "verified"
-  | "vouched"           // Phase 2: peer/manager verified
-  | "system_verified";  // Phase 2: CRM integration
+  | "self_reported"
+  | "artifact_attached"
+  | "cryptographically_verified"
+  | "system_verified";
+
+// Display + meaning for each tier, in one place so UI never hardcodes
+// strings or colors. internalLabel is the precise term; displayLabel is
+// the softened public-facing term.
+export interface VerificationTierMeta {
+  tier: VerificationTier;
+  internalLabel: string;
+  displayLabel: string;
+  proves: string; // tooltip — what this tier actually proves
+  color: string; // hex, dark-theme accent
+}
+
+export const VERIFICATION_TIER_META: Record<
+  VerificationTier,
+  VerificationTierMeta
+> = {
+  self_reported: {
+    tier: "self_reported",
+    internalLabel: "Self-reported",
+    displayLabel: "Self-reported",
+    proves: "Logged by the user. No evidence attached.",
+    color: "#6B7280",
+  },
+  artifact_attached: {
+    tier: "artifact_attached",
+    internalLabel: "Artifact-attached",
+    displayLabel: "With evidence",
+    proves:
+      "Backed by an uploaded document or screenshot, parsed by AI. Could be fabricated.",
+    color: "#F59E0B",
+  },
+  cryptographically_verified: {
+    tier: "cryptographically_verified",
+    internalLabel: "Cryptographically verified",
+    displayLabel: "Verified",
+    proves:
+      "Artifact carries a cryptographic signature (DocuSign, Stripe, email DKIM). Hard to fake.",
+    color: "#10B981",
+  },
+  system_verified: {
+    tier: "system_verified",
+    internalLabel: "System-verified",
+    displayLabel: "Verified",
+    proves: "Pulled directly from the source system via API. Source of truth.",
+    color: "#2DD4BF",
+  },
+};
+
+// "Vouched" is a modifier on any tier, not a tier itself — another
+// verified user confirmed the record. Phase 2 (needs network density).
+export const VOUCHED_META = {
+  label: "Vouched",
+  proves: "Confirmed by another verified user.",
+  color: "#818CF8",
+} as const;
 
 export interface Artifact {
   id: string;
@@ -177,10 +243,12 @@ export interface WinAnnotation {
   created_by: string;
 }
 
-// wins_with_edit_status view
+// wins_with_edit_status view — exposes raw evidence SIGNALS, not a
+// pre-baked label. The tier is derived in lib/verification.ts so the
+// "what it proves" logic lives in one readable place.
 export interface WinWithEditStatus extends Win {
   has_version_history: boolean;
-  verification_tier: VerificationTier;
+  has_linked_artifact: boolean;
 }
 
 // Shape returned by all file extractors — ready for batch approval UI

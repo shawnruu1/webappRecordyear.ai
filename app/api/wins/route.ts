@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       impact: w.impact,
       arr_amount: w.arr_amount,
       happened_at: w.happened_at,
-      verification: { source: "self" },
+      verification: { source: "self_reported" },
       role_context: w.role_context ?? null,
     }));
 
