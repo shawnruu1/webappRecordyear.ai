@@ -90,10 +90,20 @@ export async function POST(request: Request) {
     );
   }
 
+  // ---- Look up role for logging context (best-effort) ----
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+
   // ---- Extract wins ----
   let result;
   try {
-    result = await extractWinsFromFile(buffer, fileEntry.type, fileEntry.name);
+    result = await extractWinsFromFile(buffer, fileEntry.type, fileEntry.name, {
+      userId: user.id,
+      userRole: profile?.role ?? null,
+    });
   } catch (err) {
     // Extraction threw — clean up the uploaded file, don't leave it orphaned
     await supabase.storage.from("win-source-files").remove([storagePath]);

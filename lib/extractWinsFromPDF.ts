@@ -2,12 +2,20 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { ExtractedWinRecord, WinCategory } from "@/types";
 import { WIN_CATEGORIES } from "@/types";
 import { buildWinExtractionPrompt } from "@/lib/ai/buildExtractionPrompt";
+import {
+  logAICall,
+  classifyAIError,
+  newExtractionId,
+  EXTRACTION_VERSION,
+  type AICallContext,
+} from "@/lib/ai/logging";
 
 // Uses Anthropic's native PDF support — no parsing library required.
 // Claude reads the PDF directly, handling both text-based and scanned PDFs.
 // Requires beta header: anthropic-beta: pdfs-2024-09-25
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const MODEL = "claude-sonnet-4-6";
 
 // The document content block type isn't in the SDK's default union yet.
 // We send it via the raw request body and cast only at the boundary.
@@ -81,47 +89,85 @@ function normalizeRecord(item: Record<string, unknown>): ExtractedWinRecord {
 }
 
 export async function extractWinsFromPDF(
-  buffer: Buffer
+  buffer: Buffer,
+  ctx?: AICallContext
 ): Promise<ExtractedWinRecord[]> {
-  const base64Data = buffer.toString("base64");
+  const extraction_id = newExtractionId();
+  const startedAt = Date.now();
+  let usage: Anthropic.Usage | null = null;
 
-  // SDK TS types don't include the `document` content block yet.
-  // Cast at the boundary — the API accepts it with the beta header below.
-  const content: ContentBlock[] = [
-    {
-      type: "document",
-      source: {
-        type: "base64",
-        media_type: "application/pdf",
-        data: base64Data,
-      },
-    },
-    {
-      type: "text",
-      text: buildWinExtractionPrompt({ sourceType: "pdf" }),
-    },
-  ];
+  try {
+    const base64Data = buffer.toString("base64");
 
-  const message = await anthropic.messages.create(
-    {
-      model: "claude-sonnet-4-6",
-      max_tokens: 4096,
-      messages: [
-        {
-          role: "user",
-          content: content as Anthropic.MessageParam["content"],
+    // SDK TS types don't include the `document` content block yet.
+    // Cast at the boundary — the API accepts it with the beta header below.
+    const content: ContentBlock[] = [
+      {
+        type: "document",
+        source: {
+          type: "base64",
+          media_type: "application/pdf",
+          data: base64Data,
         },
-      ],
-    },
-    {
-      headers: {
-        "anthropic-beta": "pdfs-2024-09-25",
       },
-    }
-  );
+      {
+        type: "text",
+        text: buildWinExtractionPrompt({ sourceType: "pdf" }),
+      },
+    ];
 
-  const raw =
-    message.content[0].type === "text" ? message.content[0].text : "";
+    const message = await anthropic.messages.create(
+      {
+        model: MODEL,
+        max_tokens: 4096,
+        messages: [
+          {
+            role: "user",
+            content: content as Anthropic.MessageParam["content"],
+          },
+        ],
+      },
+      {
+        headers: {
+          "anthropic-beta": "pdfs-2024-09-25",
+        },
+      }
+    );
 
-  return parseResponse(raw);
+    usage = message.usage;
+    const raw =
+      message.content[0].type === "text" ? message.content[0].text : "";
+    const result = parseResponse(raw); // may throw on malformed JSON
+
+    logAICall({
+      extraction_id,
+      user_id: ctx?.userId ?? null,
+      source_type: "pdf",
+      user_role: ctx?.userRole ?? null,
+      model: MODEL,
+      extraction_version: EXTRACTION_VERSION,
+      prompt_token_count: usage?.input_tokens ?? null,
+      completion_token_count: usage?.output_tokens ?? null,
+      latency_ms: Date.now() - startedAt,
+      success: true,
+    });
+
+    return result;
+  } catch (err) {
+    logAICall({
+      extraction_id,
+      user_id: ctx?.userId ?? null,
+      source_type: "pdf",
+      user_role: ctx?.userRole ?? null,
+      model: MODEL,
+      extraction_version: EXTRACTION_VERSION,
+      prompt_token_count: usage?.input_tokens ?? null,
+      completion_token_count: usage?.output_tokens ?? null,
+      latency_ms: Date.now() - startedAt,
+      success: false,
+      error_class: classifyAIError(err),
+    });
+    // Preserve existing behavior — caller (upload route) handles the throw.
+    throw err;
+  }
 }

@@ -2,8 +2,16 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { ExtractedWinRecord, WinCategory } from "@/types";
 import { WIN_CATEGORIES } from "@/types";
 import { buildWinExtractionPrompt } from "@/lib/ai/buildExtractionPrompt";
+import {
+  logAICall,
+  classifyAIError,
+  newExtractionId,
+  EXTRACTION_VERSION,
+  type AICallContext,
+} from "@/lib/ai/logging";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const MODEL = "claude-sonnet-4-6";
 
 type SupportedImageMediaType = "image/png" | "image/jpeg" | "image/webp";
 
@@ -74,40 +82,79 @@ function normalizeRecord(item: Record<string, unknown>): ExtractedWinRecord {
 
 export async function extractWinsFromImage(
   buffer: Buffer,
-  mimeType: string
+  mimeType: string,
+  ctx?: AICallContext
 ): Promise<ExtractedWinRecord[]> {
+  // Validation guard — runs before any AI call, so it isn't logged as one.
   if (!isSupportedImageType(mimeType)) {
     throw new Error(`Unsupported image type: ${mimeType}`);
   }
 
-  const base64Data = buffer.toString("base64");
+  const extraction_id = newExtractionId();
+  const startedAt = Date.now();
+  let usage: Anthropic.Usage | null = null;
 
-  const message = await anthropic.messages.create({
-    model: "claude-sonnet-4-6",
-    max_tokens: 4096,
-    messages: [
-      {
-        role: "user",
-        content: [
-          {
-            type: "image",
-            source: {
-              type: "base64",
-              media_type: mimeType,
-              data: base64Data,
+  try {
+    const base64Data = buffer.toString("base64");
+
+    const message = await anthropic.messages.create({
+      model: MODEL,
+      max_tokens: 4096,
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "image",
+              source: {
+                type: "base64",
+                media_type: mimeType,
+                data: base64Data,
+              },
             },
-          },
-          {
-            type: "text",
-            text: buildWinExtractionPrompt({ sourceType: "image" }),
-          },
-        ],
-      },
-    ],
-  });
+            {
+              type: "text",
+              text: buildWinExtractionPrompt({ sourceType: "image" }),
+            },
+          ],
+        },
+      ],
+    });
 
-  const raw =
-    message.content[0].type === "text" ? message.content[0].text : "";
+    usage = message.usage;
+    const raw =
+      message.content[0].type === "text" ? message.content[0].text : "";
+    const result = parseResponse(raw); // may throw on malformed JSON
 
-  return parseResponse(raw);
+    logAICall({
+      extraction_id,
+      user_id: ctx?.userId ?? null,
+      source_type: "image",
+      user_role: ctx?.userRole ?? null,
+      model: MODEL,
+      extraction_version: EXTRACTION_VERSION,
+      prompt_token_count: usage?.input_tokens ?? null,
+      completion_token_count: usage?.output_tokens ?? null,
+      latency_ms: Date.now() - startedAt,
+      success: true,
+    });
+
+    return result;
+  } catch (err) {
+    logAICall({
+      extraction_id,
+      user_id: ctx?.userId ?? null,
+      source_type: "image",
+      user_role: ctx?.userRole ?? null,
+      model: MODEL,
+      extraction_version: EXTRACTION_VERSION,
+      prompt_token_count: usage?.input_tokens ?? null,
+      completion_token_count: usage?.output_tokens ?? null,
+      latency_ms: Date.now() - startedAt,
+      success: false,
+      error_class: classifyAIError(err),
+    });
+    // Preserve existing behavior — caller (upload route) handles the throw.
+    throw err;
+  }
 }

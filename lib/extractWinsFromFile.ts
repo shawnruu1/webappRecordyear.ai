@@ -1,6 +1,7 @@
 import type { FileExtractionResult } from "@/types";
 import { extractWinsFromImage } from "@/lib/extractWinsFromImage";
 import { extractWinsFromPDF } from "@/lib/extractWinsFromPDF";
+import type { AICallContext } from "@/lib/ai/logging";
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 
@@ -29,7 +30,8 @@ function isSupportedType(mimeType: string): mimeType is SupportedMimeType {
 export async function extractWinsFromFile(
   buffer: Buffer,
   mimeType: string,
-  fileName: string
+  fileName: string,
+  ctx?: AICallContext
 ): Promise<FileExtractionResult> {
   if (!isSupportedType(mimeType)) {
     return {
@@ -55,8 +57,8 @@ export async function extractWinsFromFile(
 
   const records =
     mimeType === "application/pdf"
-      ? await extractWinsFromPDF(buffer)
-      : await extractWinsFromImage(buffer, mimeType);
+      ? await extractWinsFromPDF(buffer, ctx)
+      : await extractWinsFromImage(buffer, mimeType, ctx);
 
   if (records.length === 0) {
     return {

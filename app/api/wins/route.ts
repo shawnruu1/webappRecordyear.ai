@@ -29,7 +29,10 @@ export async function POST(request: Request) {
 
     const userRole = (profile?.role as UserRole) ?? DEFAULT_USER_ROLE;
 
-    const enriched = await extractWins(raw_input, userRole);
+    const enriched = await extractWins(raw_input, userRole, {
+      userId: user.id,
+      userRole,
+    });
 
     const rows = enriched.map((w) => ({
       user_id: user.id,

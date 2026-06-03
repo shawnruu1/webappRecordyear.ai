@@ -2,8 +2,16 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { ExtractedWinRecord, WinCategory, UserRole } from "@/types";
 import { WIN_CATEGORIES, DEFAULT_USER_ROLE } from "@/types";
 import { buildWinExtractionPrompt } from "@/lib/ai/buildExtractionPrompt";
+import {
+  logAICall,
+  classifyAIError,
+  newExtractionId,
+  EXTRACTION_VERSION,
+  type AICallContext,
+} from "@/lib/ai/logging";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const MODEL = "claude-sonnet-4-6";
 
 const FALLBACK = (raw_input: string): ExtractedWinRecord[] => [
   {
@@ -84,13 +92,18 @@ function normalizeRecord(item: Record<string, unknown>): ExtractedWinRecord {
 
 export async function extractWins(
   raw_input: string,
-  userRole: UserRole = DEFAULT_USER_ROLE
+  userRole: UserRole = DEFAULT_USER_ROLE,
+  ctx?: AICallContext
 ): Promise<ExtractedWinRecord[]> {
+  const extraction_id = newExtractionId();
+  const startedAt = Date.now();
+  let usage: Anthropic.Usage | null = null;
+
   try {
     const prompt = buildWinExtractionPrompt({ sourceType: "text", userRole });
 
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-6",
+      model: MODEL,
       max_tokens: 4096,
       messages: [
         {
@@ -100,10 +113,39 @@ export async function extractWins(
       ],
     });
 
+    usage = message.usage;
     const raw = message.content[0].type === "text" ? message.content[0].text : "";
-    const result = parseResponse(raw);
+    const result = parseResponse(raw); // may throw on malformed JSON
+
+    logAICall({
+      extraction_id,
+      user_id: ctx?.userId ?? null,
+      source_type: "text",
+      user_role: ctx?.userRole ?? userRole,
+      model: MODEL,
+      extraction_version: EXTRACTION_VERSION,
+      prompt_token_count: usage?.input_tokens ?? null,
+      completion_token_count: usage?.output_tokens ?? null,
+      latency_ms: Date.now() - startedAt,
+      success: true,
+    });
+
     return result.length > 0 ? result : FALLBACK(raw_input);
   } catch (err) {
+    logAICall({
+      extraction_id,
+      user_id: ctx?.userId ?? null,
+      source_type: "text",
+      user_role: ctx?.userRole ?? userRole,
+      model: MODEL,
+      extraction_version: EXTRACTION_VERSION,
+      prompt_token_count: usage?.input_tokens ?? null,
+      completion_token_count: usage?.output_tokens ?? null,
+      latency_ms: Date.now() - startedAt,
+      success: false,
+      error_class: classifyAIError(err),
+    });
+
     console.warn(
       "[extractWins] AI enrichment skipped:",
       err instanceof Error ? err.message : err
