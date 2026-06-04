@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { Win } from "@/types";
 
 export default function WinLogger() {
+  const router = useRouter();
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [logged, setLogged] = useState<Win[] | null>(null);
@@ -26,7 +28,7 @@ export default function WinLogger() {
       const wins: Win[] = await res.json();
       setLogged(wins);
       setInput("");
-      window.location.reload();
+      router.refresh();
     } else {
       const body = await res.json().catch(() => ({}));
       setError(`Error ${res.status}: ${body.error ?? "Unknown error"}`);
