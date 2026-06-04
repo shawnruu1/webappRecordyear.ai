@@ -44,7 +44,7 @@ export default function VisibilityToggle({
   return (
     <div
       className="inline-flex rounded-lg overflow-hidden"
-      style={{ border: "1px solid rgba(255,255,255,0.1)" }}
+      style={{ border: "1px solid var(--color-border-strong)" }}
     >
       {OPTIONS.map((opt) => {
         const active = visibility === opt.value;
@@ -56,8 +56,8 @@ export default function VisibilityToggle({
             disabled={saving}
             className="text-[9px] font-semibold uppercase tracking-wide px-2 py-1 transition-colors disabled:opacity-60"
             style={{
-              background: active ? "rgba(245,158,11,0.15)" : "transparent",
-              color: active ? "#F59E0B" : "#6B7280",
+              background: active ? "color-mix(in srgb, var(--color-accent) 15%, transparent)" : "transparent",
+              color: active ? "var(--color-accent)" : "var(--color-text-tertiary)",
             }}
           >
             {opt.label}

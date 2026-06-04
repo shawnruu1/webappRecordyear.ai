@@ -7,16 +7,8 @@ import {
   ROLE_OPTIONS,
   type PublicProfilePayload,
   type PublicProfileRecord,
-  type WinCategory,
 } from "@/types";
-
-const categoryColors: Record<string, string> = {
-  "Deal Closed": "#10B981",
-  Recognition: "#EC4899",
-  Skill: "#818CF8",
-  Milestone: "#F59E0B",
-  Relationship: "#06B6D4",
-};
+import { categoryColor } from "@/lib/categoryColors";
 
 // Adapt a public record's flat provenance fields into the signal shape
 // deriveVerificationTier expects — one tier-derivation everywhere.
@@ -76,33 +68,32 @@ export default async function PublicProfilePage({
   );
 
   return (
-    <div className="min-h-screen bg-[#080B14]">
+    <div className="min-h-screen bg-surface-base">
       <div className="max-w-2xl mx-auto px-6 py-16">
         {/* Header */}
         <div className="mb-12">
-          <span className="text-lg font-bold text-[#F8F4EC]">
-            Record<span style={{ color: "#F59E0B" }}>Year</span>
+          <span className="text-lg font-bold text-text-primary">
+            Record<span style={{ color: "var(--color-accent)" }}>Year</span>
           </span>
-          <h1 className="text-3xl font-bold text-[#F8F4EC] mt-6 mb-1">
+          <h1 className="text-3xl font-bold text-text-primary mt-6 mb-1">
             {payload.profile.display_name ?? `@${payload.profile.username}`}
           </h1>
           {roleLabel && (
-            <p className="text-xs uppercase tracking-widest text-[#6B7280] mb-2">
+            <p className="text-xs uppercase tracking-widest text-text-tertiary mb-2">
               {roleLabel}
             </p>
           )}
-          <p className="text-sm text-[#6B7280]">{summary}</p>
+          <p className="text-sm text-text-tertiary">{summary}</p>
         </div>
 
         {records.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-[#374151]">No public records yet.</p>
+            <p className="text-text-faint">No public records yet.</p>
           </div>
         ) : (
           <div className="space-y-10">
             {Object.entries(byCategory).map(([category, categoryRecords]) => {
-              const color =
-                categoryColors[category as WinCategory] ?? "#6B7280";
+              const color = categoryColor(category);
               return (
                 <div key={category}>
                   <div className="flex items-center gap-2 mb-4">
@@ -128,13 +119,13 @@ export default async function PublicProfilePage({
                           className="rounded-xl p-4"
                           style={{
                             background:
-                              "linear-gradient(160deg,#0E1628 0%,#080B14 100%)",
+                              "var(--gradient-surface-card)",
                             border: `1px solid ${color}18`,
                           }}
                         >
                           {/* Title row */}
                           <div className="flex items-start justify-between gap-2 mb-1">
-                            <h3 className="text-sm font-semibold text-[#F8F4EC] flex items-center gap-1.5">
+                            <h3 className="text-sm font-semibold text-text-primary flex items-center gap-1.5">
                               {isBlurred && (
                                 <svg
                                   width="11"
@@ -150,12 +141,12 @@ export default async function PublicProfilePage({
                                     width="18"
                                     height="11"
                                     rx="2"
-                                    stroke="#6B7280"
+                                    stroke="var(--color-text-tertiary)"
                                     strokeWidth="2"
                                   />
                                   <path
                                     d="M7 11V7a5 5 0 0 1 10 0v4"
-                                    stroke="#6B7280"
+                                    stroke="var(--color-text-tertiary)"
                                     strokeWidth="2"
                                   />
                                 </svg>
@@ -165,7 +156,7 @@ export default async function PublicProfilePage({
                           </div>
 
                           {r.impact && (
-                            <p className="text-xs text-[#6B7280] leading-relaxed mb-2">
+                            <p className="text-xs text-text-tertiary leading-relaxed mb-2">
                               {r.impact}
                             </p>
                           )}
@@ -173,7 +164,7 @@ export default async function PublicProfilePage({
                           {(r.arr_range || r.arr_amount) && (
                             <p
                               className="text-xs font-semibold mb-2"
-                              style={{ color: "#F59E0B" }}
+                              style={{ color: "var(--color-accent)" }}
                             >
                               {r.arr_range
                                 ? `${r.arr_range} ARR`
@@ -204,7 +195,7 @@ export default async function PublicProfilePage({
                           {/* Footer — verification + time-of-entry */}
                           <div className="flex items-center justify-between gap-2 mt-3">
                             <VerificationBadge tier={tier} />
-                            <p className="text-[10px] text-[#374151] flex-shrink-0">
+                            <p className="text-[10px] text-text-faint flex-shrink-0">
                               {timeContext(r)}
                             </p>
                           </div>
@@ -217,9 +208,9 @@ export default async function PublicProfilePage({
                               title="Coming soon"
                               className="mt-3 inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide px-3 py-1.5 rounded-lg cursor-not-allowed opacity-70"
                               style={{
-                                background: "rgba(255,255,255,0.04)",
-                                color: "#6B7280",
-                                border: "1px solid rgba(255,255,255,0.08)",
+                                background: "var(--color-surface-overlay)",
+                                color: "var(--color-text-tertiary)",
+                                border: "1px solid var(--color-border-default)",
                               }}
                             >
                               <svg
@@ -258,11 +249,11 @@ export default async function PublicProfilePage({
 
         <div
           className="mt-16 pt-8 border-t text-center"
-          style={{ borderColor: "rgba(255,255,255,0.06)" }}
+          style={{ borderColor: "var(--color-border-subtle)" }}
         >
-          <p className="text-xs text-[#374151]">
+          <p className="text-xs text-text-faint">
             Built with{" "}
-            <a href="/" className="text-[#F59E0B] hover:underline">
+            <a href="/" className="text-accent hover:underline">
               RecordYear.ai
             </a>
           </p>

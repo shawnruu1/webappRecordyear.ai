@@ -4,14 +4,7 @@ import DashboardClient from "@/app/dashboard/DashboardClient";
 import VisibilityToggle from "@/components/VisibilityToggle";
 import UsernameClaim from "@/components/UsernameClaim";
 import type { Win, Artifact } from "@/types";
-
-const categoryColors: Record<string, string> = {
-  "Deal Closed": "#10B981",
-  "Recognition": "#EC4899",
-  "Skill": "#818CF8",
-  "Milestone": "#F59E0B",
-  "Relationship": "#06B6D4",
-};
+import { categoryColor } from "@/lib/categoryColors";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -41,24 +34,24 @@ export default async function DashboardPage() {
     .maybeSingle();
 
   return (
-    <div className="min-h-screen bg-[#080B14]">
+    <div className="min-h-screen bg-surface-base">
       {/* Header */}
       <header
         className="border-b px-6 py-4 flex justify-between items-center"
-        style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(14,22,40,0.8)" }}
+        style={{ borderColor: "var(--color-border-subtle)", background: "color-mix(in srgb, var(--color-surface-raised) 80%, transparent)" }}
       >
-        <span className="text-lg font-bold text-[#F8F4EC]">
-          Record<span style={{ color: "#F59E0B" }}>Year</span>
+        <span className="text-lg font-bold text-text-primary">
+          Record<span style={{ color: "var(--color-accent)" }}>Year</span>
         </span>
         <div className="flex items-center gap-4">
           <a
             href={`/portfolio/${user.id}`}
             target="_blank"
-            className="text-xs text-[#6B7280] hover:text-[#F59E0B] transition-colors"
+            className="text-xs text-text-tertiary hover:text-accent transition-colors"
           >
             View portfolio →
           </a>
-          <span className="text-xs text-[#374151]">{user.email}</span>
+          <span className="text-xs text-text-faint">{user.email}</span>
         </div>
       </header>
 
@@ -74,34 +67,34 @@ export default async function DashboardPage() {
 
         {/* Win feed — server-rendered, refreshed by router.refresh() after saves */}
         <div>
-          <h2 className="text-sm font-bold uppercase tracking-widest text-[#374151] mb-4">
+          <h2 className="text-sm font-bold uppercase tracking-widest text-text-faint mb-4">
             Your record — {wins?.length ?? 0} entries
           </h2>
 
           {(!wins || wins.length === 0) ? (
             <div
               className="rounded-2xl p-10 text-center"
-              style={{ border: "1px dashed rgba(255,255,255,0.08)" }}
+              style={{ border: "1px dashed var(--color-border-default)" }}
             >
-              <p className="text-[#374151] text-sm">No wins logged yet. Add your first one above.</p>
+              <p className="text-text-faint text-sm">No wins logged yet. Add your first one above.</p>
             </div>
           ) : (
             <div className="space-y-3">
               {(wins as Win[]).map((win) => {
-                const color = categoryColors[win.category ?? ""] ?? "#6B7280";
+                const color = categoryColor(win.category);
                 const isArtifact = win.verification?.source === "artifact";
                 return (
                   <div
                     key={win.id}
                     className="rounded-xl p-4"
                     style={{
-                      background: "linear-gradient(160deg,#0E1628 0%,#080B14 100%)",
-                      border: "1px solid rgba(255,255,255,0.07)",
+                      background: "var(--gradient-surface-card)",
+                      border: "1px solid var(--color-border-subtle)",
                     }}
                   >
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <div className="flex items-center gap-2 min-w-0">
-                        <h3 className="text-sm font-semibold text-[#F8F4EC] truncate">
+                        <h3 className="text-sm font-semibold text-text-primary truncate">
                           {win.title}
                         </h3>
                         {/* Artifact-backed indicator */}
@@ -113,11 +106,11 @@ export default async function DashboardPage() {
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                               <path
                                 d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
-                                stroke="#F59E0B"
+                                stroke="var(--color-accent)"
                                 strokeWidth="1.5"
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
-                                fill="rgba(245,158,11,0.1)"
+                                fill="color-mix(in srgb, var(--color-accent) 10%, transparent)"
                               />
                             </svg>
                           </span>
@@ -138,11 +131,11 @@ export default async function DashboardPage() {
                     </div>
 
                     {win.impact && (
-                      <p className="text-xs text-[#6B7280] leading-relaxed mb-2">{win.impact}</p>
+                      <p className="text-xs text-text-tertiary leading-relaxed mb-2">{win.impact}</p>
                     )}
 
                     {win.arr_amount && (
-                      <p className="text-xs font-semibold mb-2" style={{ color: "#F59E0B" }}>
+                      <p className="text-xs font-semibold mb-2" style={{ color: "var(--color-accent)" }}>
                         ${new Intl.NumberFormat("en-US").format(win.arr_amount)} ARR
                       </p>
                     )}
@@ -154,9 +147,9 @@ export default async function DashboardPage() {
                             key={tag}
                             className="text-[9px] px-2 py-0.5 rounded-full"
                             style={{
-                              background: "rgba(255,255,255,0.04)",
-                              color: "#6B7280",
-                              border: "1px solid rgba(255,255,255,0.06)",
+                              background: "var(--color-surface-overlay)",
+                              color: "var(--color-text-tertiary)",
+                              border: "1px solid var(--color-border-subtle)",
                             }}
                           >
                             {tag}
@@ -166,7 +159,7 @@ export default async function DashboardPage() {
                     )}
 
                     <div className="flex items-center justify-between gap-2 mt-3">
-                      <p className="text-[10px] text-[#374151]">
+                      <p className="text-[10px] text-text-faint">
                         {new Date(win.created_at).toLocaleDateString("en-US", {
                           month: "short",
                           day: "numeric",

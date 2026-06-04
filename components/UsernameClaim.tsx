@@ -51,23 +51,23 @@ export default function UsernameClaim({
       <div
         className="rounded-xl px-4 py-3 flex items-center justify-between gap-3"
         style={{
-          background: "rgba(245,158,11,0.05)",
-          border: "1px solid rgba(245,158,11,0.15)",
+          background: "color-mix(in srgb, var(--color-accent) 5%, transparent)",
+          border: "1px solid color-mix(in srgb, var(--color-accent) 15%, transparent)",
         }}
       >
         <div className="min-w-0">
-          <p className="text-[10px] uppercase tracking-widest text-[#6B7280] mb-0.5">
+          <p className="text-[10px] uppercase tracking-widest text-text-tertiary mb-0.5">
             Your public profile
           </p>
           <a
             href={path}
             target="_blank"
-            className="text-sm font-semibold text-[#F59E0B] hover:underline truncate block"
+            className="text-sm font-semibold text-accent hover:underline truncate block"
           >
             recordyear.ai/{claimed}
           </a>
         </div>
-        <span className="text-[9px] uppercase tracking-wide text-[#374151] flex-shrink-0">
+        <span className="text-[9px] uppercase tracking-wide text-text-faint flex-shrink-0">
           Records are private until you opt each one in
         </span>
       </div>
@@ -79,14 +79,14 @@ export default function UsernameClaim({
     <div
       className="rounded-xl px-4 py-4"
       style={{
-        background: "rgba(255,255,255,0.02)",
-        border: "1px solid rgba(255,255,255,0.08)",
+        background: "var(--color-surface-overlay-subtle)",
+        border: "1px solid var(--color-border-default)",
       }}
     >
-      <p className="text-sm font-semibold text-[#F8F4EC] mb-0.5">
+      <p className="text-sm font-semibold text-text-primary mb-0.5">
         Want a public profile?
       </p>
-      <p className="text-xs text-[#6B7280] mb-3">
+      <p className="text-xs text-text-tertiary mb-3">
         Claim your username — recruiter-shareable, and every record stays
         private until you choose to show it.
       </p>
@@ -97,21 +97,21 @@ export default function UsernameClaim({
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
           placeholder="Display name (e.g. Shawn Winters)"
-          className="w-full px-3 py-2 rounded-lg text-sm text-[#F8F4EC] placeholder-[#4B5563] focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/40"
+          className="w-full px-3 py-2 rounded-lg text-sm text-text-primary placeholder-text-quaternary focus:outline-none focus:ring-2 focus:ring-accent/40"
           style={{
-            background: "rgba(255,255,255,0.05)",
-            border: "1px solid rgba(255,255,255,0.1)",
+            background: "var(--color-surface-overlay-strong)",
+            border: "1px solid var(--color-border-strong)",
           }}
         />
         <div className="flex items-stretch gap-2">
           <div
-            className="flex items-center pl-3 pr-1 rounded-lg text-sm text-[#6B7280] flex-1"
+            className="flex items-center pl-3 pr-1 rounded-lg text-sm text-text-tertiary flex-1"
             style={{
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.1)",
+              background: "var(--color-surface-overlay-strong)",
+              border: "1px solid var(--color-border-strong)",
             }}
           >
-            <span className="text-[#4B5563]">recordyear.ai/</span>
+            <span className="text-text-quaternary">recordyear.ai/</span>
             <input
               type="text"
               value={username}
@@ -120,7 +120,7 @@ export default function UsernameClaim({
               }
               placeholder="username"
               required
-              className="flex-1 bg-transparent py-2 pl-0.5 text-sm text-[#F8F4EC] placeholder-[#4B5563] focus:outline-none"
+              className="flex-1 bg-transparent py-2 pl-0.5 text-sm text-text-primary placeholder-text-quaternary focus:outline-none"
             />
           </div>
           <button
@@ -128,14 +128,14 @@ export default function UsernameClaim({
             disabled={loading || username.length < 3}
             className="px-4 rounded-lg text-sm font-bold transition-all hover:opacity-90 disabled:opacity-50"
             style={{
-              background: "linear-gradient(135deg,#F59E0B 0%,#FCD34D 100%)",
-              color: "#080B14",
+              background: "var(--gradient-accent)",
+              color: "var(--color-surface-base)",
             }}
           >
             {loading ? "Claiming..." : "Claim"}
           </button>
         </div>
-        {error && <p className="text-xs text-red-400">{error}</p>}
+        {error && <p className="text-xs text-danger-soft">{error}</p>}
       </form>
     </div>
   );

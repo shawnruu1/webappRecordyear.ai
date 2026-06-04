@@ -190,13 +190,13 @@ export default function FileUploader({ onResults }: Props) {
     <div
       className="rounded-2xl p-6"
       style={{
-        background: "linear-gradient(160deg,#0E1628 0%,#080B14 100%)",
-        border: `1px solid ${isDragging ? "rgba(245,158,11,0.5)" : "rgba(245,158,11,0.15)"}`,
+        background: "var(--gradient-surface-card)",
+        border: `1px solid ${isDragging ? "color-mix(in srgb, var(--color-accent) 50%, transparent)" : "color-mix(in srgb, var(--color-accent) 15%, transparent)"}`,
         transition: "border-color 0.15s ease",
       }}
     >
-      <h2 className="text-base font-bold text-[#F8F4EC] mb-1">Upload a file</h2>
-      <p className="text-xs text-[#6B7280] mb-4">
+      <h2 className="text-base font-bold text-text-primary mb-1">Upload a file</h2>
+      <p className="text-xs text-text-tertiary mb-4">
         Screenshots, PDFs, CRM exports. AI extracts every win automatically.
       </p>
 
@@ -210,24 +210,24 @@ export default function FileUploader({ onResults }: Props) {
         style={{
           padding: "28px 20px",
           background: isDragging
-            ? "rgba(245,158,11,0.06)"
-            : "rgba(255,255,255,0.02)",
-          border: `1.5px dashed ${isDragging ? "rgba(245,158,11,0.4)" : "rgba(255,255,255,0.1)"}`,
+            ? "color-mix(in srgb, var(--color-accent) 6%, transparent)"
+            : "var(--color-surface-overlay-subtle)",
+          border: `1.5px dashed ${isDragging ? "color-mix(in srgb, var(--color-accent) 40%, transparent)" : "var(--color-border-strong)"}`,
           transition: "all 0.15s ease",
         }}
       >
         {/* Upload icon */}
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-          style={{ color: isDragging ? "#F59E0B" : "#374151", transition: "color 0.15s ease" }}>
+          style={{ color: isDragging ? "var(--color-accent)" : "var(--color-text-faint)", transition: "color 0.15s ease" }}>
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           <polyline points="17 8 12 3 7 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           <line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
         </svg>
 
-        <p className="text-xs text-[#6B7280] text-center">
-          <span className="text-[#F59E0B] font-semibold">Click to upload</span> or drag and drop
+        <p className="text-xs text-text-tertiary text-center">
+          <span className="text-accent font-semibold">Click to upload</span> or drag and drop
         </p>
-        <p className="text-[10px] text-[#374151]">PNG, JPG, WEBP, PDF · Max 10MB per file</p>
+        <p className="text-[10px] text-text-faint">PNG, JPG, WEBP, PDF · Max 10MB per file</p>
 
         <input
           ref={inputRef}
@@ -265,8 +265,8 @@ export default function FileUploader({ onResults }: Props) {
 
       {/* Summary when all complete */}
       {allDone && (
-        <div className="mt-4 pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-          <p className="text-[11px] text-[#6B7280]">
+        <div className="mt-4 pt-4" style={{ borderTop: "1px solid var(--color-border-subtle)" }}>
+          <p className="text-[11px] text-text-tertiary">
             {entries.filter((e) => e.status === "done" && (e.result?.records.length ?? 0) > 0).length > 0
               ? "Review extracted wins below before saving."
               : "No wins were found. Try a different file or log one manually above."}
@@ -294,13 +294,13 @@ function FileRow({ entry, onRemove, onRetry }: FileRowProps) {
     <div
       className="flex items-center gap-3 rounded-xl px-3 py-2.5"
       style={{
-        background: "rgba(255,255,255,0.03)",
+        background: "var(--color-surface-overlay-subtle)",
         border: `1px solid ${
           status === "error"
-            ? "rgba(239,68,68,0.2)"
+            ? "color-mix(in srgb, var(--color-danger) 20%, transparent)"
             : status === "done"
-            ? "rgba(16,185,129,0.15)"
-            : "rgba(255,255,255,0.06)"
+            ? "color-mix(in srgb, var(--color-success) 15%, transparent)"
+            : "var(--color-border-subtle)"
         }`,
       }}
     >
@@ -310,25 +310,25 @@ function FileRow({ entry, onRemove, onRetry }: FileRowProps) {
       {/* Name + meta */}
       <div className="flex-1 min-w-0">
         {isValidationError ? (
-          <p className="text-xs text-red-400 leading-snug">{error}</p>
+          <p className="text-xs text-danger-soft leading-snug">{error}</p>
         ) : (
           <>
-            <p className="text-xs text-[#F8F4EC] truncate font-medium">{file.name}</p>
-            <p className="text-[10px] text-[#374151] mt-0.5">
+            <p className="text-xs text-text-primary truncate font-medium">{file.name}</p>
+            <p className="text-[10px] text-text-faint mt-0.5">
               {formatSize(file.size)}
               {status === "done" && result && result.records.length > 0 && (
-                <span className="ml-2 text-[#10B981]">
+                <span className="ml-2 text-success">
                   · {result.records.length} win{result.records.length === 1 ? "" : "s"} found
                 </span>
               )}
               {status === "done" && result && result.records.length === 0 && (
-                <span className="ml-2 text-[#6B7280]">· No wins found</span>
+                <span className="ml-2 text-text-tertiary">· No wins found</span>
               )}
             </p>
           </>
         )}
         {status === "error" && !isValidationError && error && (
-          <p className="text-[10px] text-red-400 mt-0.5">{error}</p>
+          <p className="text-[10px] text-danger-soft mt-0.5">{error}</p>
         )}
       </div>
 
@@ -336,7 +336,7 @@ function FileRow({ entry, onRemove, onRetry }: FileRowProps) {
       <div className="flex items-center gap-2 flex-shrink-0">
         {status === "uploading" && <Spinner />}
         {status === "done" && result && result.records.length > 0 && (
-          <span style={{ color: "#10B981" }}>
+          <span style={{ color: "var(--color-success)" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
               <polyline points="20 6 9 17 4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
@@ -345,14 +345,14 @@ function FileRow({ entry, onRemove, onRetry }: FileRowProps) {
         {status === "error" && !isValidationError && (
           <button
             onClick={onRetry}
-            className="text-[10px] text-[#F59E0B] hover:opacity-80 transition-opacity font-medium"
+            className="text-[10px] text-accent hover:opacity-80 transition-opacity font-medium"
           >
             Retry
           </button>
         )}
         <button
           onClick={onRemove}
-          className="text-[#374151] hover:text-[#6B7280] transition-colors"
+          className="text-text-faint hover:text-text-tertiary transition-colors"
           aria-label={`Remove ${file.name}`}
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
@@ -374,9 +374,9 @@ function FileTypeIcon({ mimeType }: { mimeType: string }) {
     <div
       className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-[9px] font-bold"
       style={{
-        background: isPDF ? "rgba(239,68,68,0.1)" : "rgba(99,102,241,0.1)",
-        color: isPDF ? "#F87171" : "#818CF8",
-        border: `1px solid ${isPDF ? "rgba(239,68,68,0.2)" : "rgba(99,102,241,0.2)"}`,
+        background: isPDF ? "color-mix(in srgb, var(--color-danger) 10%, transparent)" : "color-mix(in srgb, var(--color-info) 10%, transparent)",
+        color: isPDF ? "var(--color-danger-soft)" : "var(--color-info)",
+        border: `1px solid ${isPDF ? "color-mix(in srgb, var(--color-danger) 20%, transparent)" : "color-mix(in srgb, var(--color-info) 20%, transparent)"}`,
       }}
     >
       {isPDF ? "PDF" : "IMG"}
@@ -391,7 +391,7 @@ function Spinner() {
       height="14"
       viewBox="0 0 24 24"
       fill="none"
-      style={{ color: "#F59E0B", animation: "spin 0.8s linear infinite" }}
+      style={{ color: "var(--color-accent)", animation: "spin 0.8s linear infinite" }}
     >
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       <path

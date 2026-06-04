@@ -1,22 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import type { WinWithEditStatus, WinVersion, WinCategory } from "@/types";
+import type { WinWithEditStatus, WinVersion } from "@/types";
 import { deriveVerificationTier } from "@/lib/verification";
 import { timeContext } from "@/lib/recordDisplay";
+import { categoryColor } from "@/lib/categoryColors";
 import VerificationBadge from "@/components/VerificationBadge";
 
 // ------------------------------------------------------------
 // Config
 // ------------------------------------------------------------
-const categoryColors: Record<WinCategory, string> = {
-  "Deal Closed": "#10B981",
-  "Recognition": "#EC4899",
-  "Skill": "#818CF8",
-  "Milestone": "#F59E0B",
-  "Relationship": "#06B6D4",
-};
-
 const FIELD_LABELS: Record<string, string> = {
   title: "Title",
   impact: "Impact",
@@ -48,7 +41,7 @@ export default function PortfolioClient({
   if (wins.length === 0) {
     return (
       <div className="text-center py-20">
-        <p className="text-[#374151]">
+        <p className="text-text-faint">
           {filtersActive
             ? "No records match these filters."
             : "No wins recorded yet."}
@@ -67,7 +60,7 @@ export default function PortfolioClient({
   return (
     <div className="space-y-10">
       {Object.entries(byCategory).map(([category, categoryWins]) => {
-        const color = categoryColors[category as WinCategory] ?? "#6B7280";
+        const color = categoryColor(category);
         return (
           <div key={category}>
             <div className="flex items-center gap-2 mb-4">
@@ -89,13 +82,13 @@ export default function PortfolioClient({
                     <div
                       className="rounded-xl p-4"
                       style={{
-                        background: "linear-gradient(160deg,#0E1628 0%,#080B14 100%)",
+                        background: "var(--gradient-surface-card)",
                         border: `1px solid ${color}18`,
                       }}
                     >
                       {/* Title row */}
                       <div className="flex items-start justify-between gap-2 mb-1">
-                        <h3 className="text-sm font-semibold text-[#F8F4EC]">{win.title}</h3>
+                        <h3 className="text-sm font-semibold text-text-primary">{win.title}</h3>
 
                         {/* Edited indicator — only shown on artifact-backed wins with version history */}
                         {win.has_version_history && (
@@ -103,7 +96,7 @@ export default function PortfolioClient({
                             onClick={() => setOpenChangelog(isOpen ? null : win.id)}
                             title="This record has been edited — view changelog"
                             className="flex-shrink-0 flex items-center gap-1 transition-colors"
-                            style={{ color: isOpen ? "#F59E0B" : "#374151" }}
+                            style={{ color: isOpen ? "var(--color-accent)" : "var(--color-text-faint)" }}
                           >
                             {/* Pencil icon */}
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
@@ -130,7 +123,7 @@ export default function PortfolioClient({
                       </div>
 
                       {win.impact && (
-                        <p className="text-xs text-[#6B7280] leading-relaxed mb-2">{win.impact}</p>
+                        <p className="text-xs text-text-tertiary leading-relaxed mb-2">{win.impact}</p>
                       )}
 
                       {win.tags?.length > 0 && (
@@ -154,7 +147,7 @@ export default function PortfolioClient({
                       {/* Footer — honest verification tier + time-of-entry */}
                       <div className="flex items-center justify-between gap-2 mt-3">
                         <VerificationBadge tier={tier} vouched={vouched} />
-                        <p className="text-[10px] text-[#374151] flex-shrink-0">
+                        <p className="text-[10px] text-text-faint flex-shrink-0">
                           {timeContext(win)}
                         </p>
                       </div>
@@ -165,11 +158,11 @@ export default function PortfolioClient({
                       <div
                         className="mt-1 rounded-xl px-4 py-4 space-y-4"
                         style={{
-                          background: "rgba(245,158,11,0.03)",
-                          border: "1px solid rgba(245,158,11,0.12)",
+                          background: "color-mix(in srgb, var(--color-accent) 3%, transparent)",
+                          border: "1px solid color-mix(in srgb, var(--color-accent) 12%, transparent)",
                         }}
                       >
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#6B7280]">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-text-tertiary">
                           Edit history
                         </p>
 
@@ -177,7 +170,7 @@ export default function PortfolioClient({
                           <div key={v.id} className="space-y-1.5">
                             {/* Date + field badge */}
                             <div className="flex items-center gap-2">
-                              <span className="text-[9px] text-[#374151]">
+                              <span className="text-[9px] text-text-faint">
                                 {new Date(v.changed_at).toLocaleDateString("en-US", {
                                   month: "short",
                                   day: "numeric",
@@ -187,8 +180,8 @@ export default function PortfolioClient({
                               <span
                                 className="text-[9px] px-1.5 py-0.5 rounded font-semibold uppercase tracking-wide"
                                 style={{
-                                  background: "rgba(245,158,11,0.1)",
-                                  color: "#F59E0B",
+                                  background: "color-mix(in srgb, var(--color-accent) 10%, transparent)",
+                                  color: "var(--color-accent)",
                                 }}
                               >
                                 {FIELD_LABELS[v.field_name] ?? v.field_name}
@@ -198,18 +191,18 @@ export default function PortfolioClient({
                             {/* Old → new values */}
                             <div
                               className="space-y-0.5 pl-2"
-                              style={{ borderLeft: "1.5px solid rgba(255,255,255,0.07)" }}
+                              style={{ borderLeft: "1.5px solid var(--color-border-subtle)" }}
                             >
                               {v.old_value && (
                                 <p
                                   className="text-[10px] leading-relaxed line-through"
-                                  style={{ color: "#4B5563" }}
+                                  style={{ color: "var(--color-text-quaternary)" }}
                                 >
                                   {v.old_value}
                                 </p>
                               )}
                               {v.new_value && (
-                                <p className="text-[10px] text-[#9CA3AF] leading-relaxed">
+                                <p className="text-[10px] text-text-secondary leading-relaxed">
                                   {v.new_value}
                                 </p>
                               )}

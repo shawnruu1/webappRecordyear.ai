@@ -62,10 +62,10 @@ export default function PortfolioFilterBar({
     <div
       className="sticky top-0 z-10 -mx-6 px-6 py-3 mb-8 flex flex-wrap items-center justify-between gap-3"
       style={{
-        background: "rgba(8,11,20,0.85)",
+        background: "color-mix(in srgb, var(--color-surface-base) 85%, transparent)",
         backdropFilter: "blur(8px)",
         WebkitBackdropFilter: "blur(8px)",
-        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        borderBottom: "1px solid var(--color-border-subtle)",
       }}
     >
       {/* Category chips */}
@@ -82,11 +82,11 @@ export default function PortfolioFilterBar({
               className="text-[10px] font-semibold px-2.5 py-1 rounded-full transition-colors"
               style={{
                 background: active
-                  ? "rgba(245,158,11,0.15)"
-                  : "rgba(255,255,255,0.03)",
-                color: active ? "#F59E0B" : "#6B7280",
+                  ? "color-mix(in srgb, var(--color-accent) 15%, transparent)"
+                  : "var(--color-surface-overlay-subtle)",
+                color: active ? "var(--color-accent)" : "var(--color-text-tertiary)",
                 border: `1px solid ${
-                  active ? "rgba(245,158,11,0.35)" : "rgba(255,255,255,0.08)"
+                  active ? "color-mix(in srgb, var(--color-accent) 35%, transparent)" : "var(--color-border-default)"
                 }`,
               }}
             >
@@ -101,14 +101,14 @@ export default function PortfolioFilterBar({
         value={activePeriod}
         onChange={(e) => push({ period: e.target.value as PeriodKey })}
         aria-label="Filter by date period"
-        className="text-[10px] text-[#9CA3AF] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/30"
+        className="text-[10px] text-text-secondary rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent/30"
         style={{
-          background: "rgba(255,255,255,0.04)",
-          border: "1px solid rgba(255,255,255,0.1)",
+          background: "var(--color-surface-overlay)",
+          border: "1px solid var(--color-border-strong)",
         }}
       >
         {PERIOD_OPTIONS.map((o) => (
-          <option key={o.value} value={o.value} className="bg-[#0E1628]">
+          <option key={o.value} value={o.value} className="bg-surface-raised">
             {o.label}
           </option>
         ))}

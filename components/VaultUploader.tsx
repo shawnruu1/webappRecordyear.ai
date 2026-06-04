@@ -142,12 +142,12 @@ export default function VaultUploader({ onResult }: Props) {
         style={{
           padding: "24px 20px",
           background: isDragging
-            ? "rgba(245,158,11,0.05)"
-            : "rgba(255,255,255,0.02)",
+            ? "color-mix(in srgb, var(--color-accent) 5%, transparent)"
+            : "var(--color-surface-overlay-subtle)",
           border: `1.5px dashed ${
             isDragging
-              ? "rgba(245,158,11,0.4)"
-              : "rgba(255,255,255,0.08)"
+              ? "color-mix(in srgb, var(--color-accent) 40%, transparent)"
+              : "var(--color-border-default)"
           }`,
           cursor: isUploading ? "default" : "pointer",
           transition: "all 0.15s ease",
@@ -156,14 +156,14 @@ export default function VaultUploader({ onResult }: Props) {
         {isUploading ? (
           <>
             <Spinner />
-            <p className="text-xs text-[#6B7280]">
+            <p className="text-xs text-text-tertiary">
               Extracting from{" "}
-              <span className="text-[#F8F4EC] font-medium">
+              <span className="text-text-primary font-medium">
                 {uploadState.fileName}
               </span>
               …
             </p>
-            <p className="text-[10px] text-[#374151]">
+            <p className="text-[10px] text-text-faint">
               AI is reading the deck. Takes about 10 seconds.
             </p>
           </>
@@ -176,7 +176,7 @@ export default function VaultUploader({ onResult }: Props) {
               viewBox="0 0 24 24"
               fill="none"
               style={{
-                color: isDragging ? "#F59E0B" : "#374151",
+                color: isDragging ? "var(--color-accent)" : "var(--color-text-faint)",
                 transition: "color 0.15s ease",
               }}
             >
@@ -204,13 +204,13 @@ export default function VaultUploader({ onResult }: Props) {
                 strokeLinecap="round"
               />
             </svg>
-            <p className="text-xs text-[#6B7280] text-center">
-              <span className="text-[#F59E0B] font-semibold">
+            <p className="text-xs text-text-tertiary text-center">
+              <span className="text-accent font-semibold">
                 Click to upload
               </span>{" "}
               or drag and drop
             </p>
-            <p className="text-[10px] text-[#374151]">PPTX or PDF · Max 50MB</p>
+            <p className="text-[10px] text-text-faint">PPTX or PDF · Max 50MB</p>
           </>
         )}
 
@@ -229,14 +229,14 @@ export default function VaultUploader({ onResult }: Props) {
         <div
           className="mt-2 rounded-xl px-4 py-3 flex items-center justify-between gap-3"
           style={{
-            background: "rgba(239,68,68,0.06)",
-            border: "1px solid rgba(239,68,68,0.2)",
+            background: "color-mix(in srgb, var(--color-danger) 6%, transparent)",
+            border: "1px solid color-mix(in srgb, var(--color-danger) 20%, transparent)",
           }}
         >
-          <p className="text-xs text-red-400">{uploadState.message}</p>
+          <p className="text-xs text-danger-soft">{uploadState.message}</p>
           <button
             onClick={retry}
-            className="text-[10px] text-[#F59E0B] hover:opacity-80 transition-opacity font-semibold flex-shrink-0"
+            className="text-[10px] text-accent hover:opacity-80 transition-opacity font-semibold flex-shrink-0"
           >
             Try again
           </button>
@@ -253,7 +253,7 @@ function Spinner() {
       height="18"
       viewBox="0 0 24 24"
       fill="none"
-      style={{ color: "#F59E0B", animation: "spin 0.8s linear infinite" }}
+      style={{ color: "var(--color-accent)", animation: "spin 0.8s linear infinite" }}
     >
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       <path

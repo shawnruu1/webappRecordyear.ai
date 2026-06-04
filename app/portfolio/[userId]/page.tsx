@@ -108,15 +108,15 @@ export default async function PortfolioPage({
   }
 
   return (
-    <div className="min-h-screen bg-[#080B14]">
+    <div className="min-h-screen bg-surface-base">
       <div className="max-w-2xl mx-auto px-6 py-16">
         {/* Header */}
         <div className="mb-12">
-          <span className="text-lg font-bold text-[#F8F4EC]">
-            Record<span style={{ color: "#F59E0B" }}>Year</span>
+          <span className="text-lg font-bold text-text-primary">
+            Record<span style={{ color: "var(--color-accent)" }}>Year</span>
           </span>
-          <h1 className="text-3xl font-bold text-[#F8F4EC] mt-6 mb-2">Career Record</h1>
-          <p className="text-sm text-[#6B7280]">{summary}</p>
+          <h1 className="text-3xl font-bold text-text-primary mt-6 mb-2">Career Record</h1>
+          <p className="text-sm text-text-tertiary">{summary}</p>
         </div>
 
         <PortfolioFilterBar
@@ -133,11 +133,11 @@ export default async function PortfolioPage({
 
         <div
           className="mt-16 pt-8 border-t text-center"
-          style={{ borderColor: "rgba(255,255,255,0.06)" }}
+          style={{ borderColor: "var(--color-border-subtle)" }}
         >
-          <p className="text-xs text-[#374151]">
+          <p className="text-xs text-text-faint">
             Built with{" "}
-            <a href="/" className="text-[#F59E0B] hover:underline">
+            <a href="/" className="text-accent hover:underline">
               RecordYear.ai
             </a>
           </p>

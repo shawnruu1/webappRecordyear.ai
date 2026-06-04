@@ -145,33 +145,33 @@ export default function BatchApproval({ results, onSaved, onDismiss }: Props) {
 
   return (
     <div className="rounded-2xl overflow-hidden"
-      style={{ border: "1px solid rgba(245,158,11,0.2)", background: "linear-gradient(160deg,#0E1628 0%,#080B14 100%)" }}>
+      style={{ border: "1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)", background: "var(--gradient-surface-card)" }}>
 
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        style={{ borderBottom: "1px solid var(--color-border-subtle)" }}>
         <div>
-          <h2 className="text-base font-bold text-[#F8F4EC]">Review extracted wins</h2>
-          <p className="text-xs text-[#6B7280] mt-0.5">
+          <h2 className="text-base font-bold text-text-primary">Review extracted wins</h2>
+          <p className="text-xs text-text-tertiary mt-0.5">
             Edit any field before approving. Approved records are saved to your record.
           </p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={approveAll}
             className="text-[11px] px-3 py-1.5 rounded-lg font-semibold transition-opacity hover:opacity-80"
-            style={{ background: "rgba(16,185,129,0.12)", color: "#10B981", border: "1px solid rgba(16,185,129,0.2)" }}>
+            style={{ background: "color-mix(in srgb, var(--color-success) 12%, transparent)", color: "var(--color-success)", border: "1px solid color-mix(in srgb, var(--color-success) 20%, transparent)" }}>
             Approve all
           </button>
           <button onClick={rejectAll}
             className="text-[11px] px-3 py-1.5 rounded-lg font-semibold transition-opacity hover:opacity-80"
-            style={{ background: "rgba(239,68,68,0.08)", color: "#F87171", border: "1px solid rgba(239,68,68,0.15)" }}>
+            style={{ background: "color-mix(in srgb, var(--color-danger) 8%, transparent)", color: "var(--color-danger-soft)", border: "1px solid color-mix(in srgb, var(--color-danger) 15%, transparent)" }}>
             Reject all
           </button>
         </div>
       </div>
 
       {/* Record groups */}
-      <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+      <div className="divide-y" style={{ borderColor: "var(--color-surface-overlay-strong)" }}>
         {Array.from(grouped.entries()).map(([fileName, fileRecords]) => (
           <FileGroup
             key={fileName}
@@ -185,26 +185,26 @@ export default function BatchApproval({ results, onSaved, onDismiss }: Props) {
 
       {/* Summary footer */}
       <div className="px-6 py-4 flex items-center justify-between gap-4"
-        style={{ borderTop: "1px solid rgba(255,255,255,0.06)", background: "rgba(0,0,0,0.2)" }}>
+        style={{ borderTop: "1px solid var(--color-border-subtle)", background: "rgba(0,0,0,0.2)" }}>
         <div className="flex items-center gap-4 text-xs">
-          <span className="text-[#10B981] font-semibold">{approved.length} approved</span>
-          <span className="text-[#F87171]">{rejected.length} rejected</span>
-          {pending.length > 0 && <span className="text-[#6B7280]">{pending.length} pending</span>}
+          <span className="text-success font-semibold">{approved.length} approved</span>
+          <span className="text-danger-soft">{rejected.length} rejected</span>
+          {pending.length > 0 && <span className="text-text-tertiary">{pending.length} pending</span>}
         </div>
 
         <div className="flex items-center gap-3">
           {saveError && (
-            <p className="text-xs text-red-400">{saveError}</p>
+            <p className="text-xs text-danger-soft">{saveError}</p>
           )}
           <button onClick={onDismiss}
-            className="text-xs text-[#374151] hover:text-[#6B7280] transition-colors px-3 py-2">
+            className="text-xs text-text-faint hover:text-text-tertiary transition-colors px-3 py-2">
             Dismiss
           </button>
           <button
             onClick={handleSave}
             disabled={saving || approved.length === 0}
             className="px-5 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-90 disabled:opacity-40"
-            style={{ background: "linear-gradient(135deg,#F59E0B 0%,#FCD34D 100%)", color: "#080B14" }}>
+            style={{ background: "var(--gradient-accent)", color: "var(--color-surface-base)" }}>
             {saving ? "Saving…" : `Save ${approved.length} approved →`}
           </button>
         </div>
@@ -230,16 +230,16 @@ function FileGroup({ fileName, records, onApproval, onUpdate }: FileGroupProps) 
   return (
     <div>
       <div className="flex items-center gap-3 px-6 py-3"
-        style={{ background: "rgba(255,255,255,0.02)" }}>
+        style={{ background: "var(--color-surface-overlay-subtle)" }}>
         <div className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0"
-          style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)" }}>
+          style={{ background: "color-mix(in srgb, var(--color-accent) 10%, transparent)", border: "1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)" }}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" stroke="#F59E0B" strokeWidth="1.5"/>
-            <polyline points="13 2 13 9 20 9" stroke="#F59E0B" strokeWidth="1.5"/>
+            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" stroke="var(--color-accent)" strokeWidth="1.5"/>
+            <polyline points="13 2 13 9 20 9" stroke="var(--color-accent)" strokeWidth="1.5"/>
           </svg>
         </div>
-        <span className="text-xs font-semibold text-[#F8F4EC] truncate flex-1">{fileName}</span>
-        <span className="text-[10px] text-[#6B7280] flex-shrink-0">
+        <span className="text-xs font-semibold text-text-primary truncate flex-1">{fileName}</span>
+        <span className="text-[10px] text-text-tertiary flex-shrink-0">
           {approvedCount}/{totalCount} approved
         </span>
       </div>
@@ -274,23 +274,23 @@ function RecordCard({ record, onApproval, onUpdate }: RecordCardProps) {
 
   const borderColor =
     approval === "approved"
-      ? "rgba(16,185,129,0.3)"
+      ? "color-mix(in srgb, var(--color-success) 30%, transparent)"
       : approval === "rejected"
-      ? "rgba(239,68,68,0.2)"
+      ? "color-mix(in srgb, var(--color-danger) 20%, transparent)"
       : needsReview
       ? isLowConfidence
-        ? "rgba(239,68,68,0.25)"
-        : "rgba(245,158,11,0.25)"
-      : "rgba(255,255,255,0.07)";
+        ? "color-mix(in srgb, var(--color-danger) 25%, transparent)"
+        : "color-mix(in srgb, var(--color-accent) 25%, transparent)"
+      : "var(--color-border-subtle)";
 
   return (
     <div className="rounded-xl p-4 space-y-3"
-      style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${borderColor}`, transition: "border-color 0.15s" }}>
+      style={{ background: "var(--color-surface-overlay-subtle)", border: `1px solid ${borderColor}`, transition: "border-color 0.15s" }}>
 
       {/* Confidence flag */}
       {needsReview && approval === "pending" && (
         <div className="flex items-center gap-1.5"
-          style={{ color: isLowConfidence ? "#F87171" : "#F59E0B" }}>
+          style={{ color: isLowConfidence ? "var(--color-danger-soft)" : "var(--color-accent)" }}>
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
             <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
               stroke="currentColor" strokeWidth="2" fill="currentColor" fillOpacity="0.15"/>
@@ -310,15 +310,15 @@ function RecordCard({ record, onApproval, onUpdate }: RecordCardProps) {
           value={edited.title}
           onChange={(e) => onUpdate(key, { title: e.target.value })}
           maxLength={80}
-          className="flex-1 text-sm font-semibold text-[#F8F4EC] bg-transparent rounded-lg px-2 py-1 focus:outline-none focus:ring-1"
-          style={{ border: "1px solid rgba(255,255,255,0.08)", focusRingColor: "rgba(245,158,11,0.4)" } as React.CSSProperties}
+          className="flex-1 text-sm font-semibold text-text-primary bg-transparent rounded-lg px-2 py-1 focus:outline-none focus:ring-1"
+          style={{ border: "1px solid var(--color-border-default)", focusRingColor: "color-mix(in srgb, var(--color-accent) 40%, transparent)" } as React.CSSProperties}
           placeholder="Title"
         />
         <select
           value={edited.category}
           onChange={(e) => onUpdate(key, { category: e.target.value as WinCategory })}
           className="text-xs rounded-lg px-2 py-1 focus:outline-none focus:ring-1"
-          style={{ background: "#0E1628", color: "#F8F4EC", border: "1px solid rgba(255,255,255,0.08)", minWidth: "130px" }}>
+          style={{ background: "var(--color-surface-raised)", color: "var(--color-text-primary)", border: "1px solid var(--color-border-default)", minWidth: "130px" }}>
           {WIN_CATEGORIES.map((c) => (
             <option key={c} value={c}>{c}</option>
           ))}
@@ -330,8 +330,8 @@ function RecordCard({ record, onApproval, onUpdate }: RecordCardProps) {
         value={edited.impact}
         onChange={(e) => onUpdate(key, { impact: e.target.value })}
         rows={2}
-        className="w-full text-xs text-[#9CA3AF] bg-transparent rounded-lg px-2 py-1.5 resize-none focus:outline-none focus:ring-1"
-        style={{ border: "1px solid rgba(255,255,255,0.06)" }}
+        className="w-full text-xs text-text-secondary bg-transparent rounded-lg px-2 py-1.5 resize-none focus:outline-none focus:ring-1"
+        style={{ border: "1px solid var(--color-border-subtle)" }}
         placeholder="Impact statement"
       />
 
@@ -339,7 +339,7 @@ function RecordCard({ record, onApproval, onUpdate }: RecordCardProps) {
       <div className="flex gap-2">
         {/* ARR */}
         <div className="flex-1 relative">
-          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-[#6B7280]">$</span>
+          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-text-tertiary">$</span>
           <input
             type="text"
             inputMode="numeric"
@@ -348,12 +348,12 @@ function RecordCard({ record, onApproval, onUpdate }: RecordCardProps) {
               const raw = e.target.value.replace(/[^0-9]/g, "");
               onUpdate(key, { arr_amount: raw === "" ? null : parseInt(raw, 10) });
             }}
-            className="w-full text-xs text-[#F8F4EC] bg-transparent rounded-lg pl-6 pr-2 py-1.5 focus:outline-none focus:ring-1"
-            style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+            className="w-full text-xs text-text-primary bg-transparent rounded-lg pl-6 pr-2 py-1.5 focus:outline-none focus:ring-1"
+            style={{ border: "1px solid var(--color-border-default)" }}
             placeholder="ARR"
           />
           {edited.arr_amount !== null && (
-            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-[#6B7280]">ARR</span>
+            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-text-tertiary">ARR</span>
           )}
         </div>
         {/* Date */}
@@ -361,8 +361,8 @@ function RecordCard({ record, onApproval, onUpdate }: RecordCardProps) {
           type="date"
           value={edited.happened_at?.slice(0, 10) ?? ""}
           onChange={(e) => onUpdate(key, { happened_at: e.target.value || null })}
-          className="text-xs text-[#9CA3AF] bg-transparent rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1"
-          style={{ border: "1px solid rgba(255,255,255,0.08)", colorScheme: "dark", minWidth: "140px" }}
+          className="text-xs text-text-secondary bg-transparent rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1"
+          style={{ border: "1px solid var(--color-border-default)", colorScheme: "dark", minWidth: "140px" }}
         />
       </div>
 
@@ -374,14 +374,14 @@ function RecordCard({ record, onApproval, onUpdate }: RecordCardProps) {
 
       {/* Source excerpt (collapsed, for reference) */}
       <details className="group">
-        <summary className="text-[10px] text-[#374151] cursor-pointer hover:text-[#6B7280] transition-colors list-none flex items-center gap-1">
+        <summary className="text-[10px] text-text-faint cursor-pointer hover:text-text-tertiary transition-colors list-none flex items-center gap-1">
           <svg width="8" height="8" viewBox="0 0 24 24" fill="none" className="group-open:rotate-90 transition-transform">
             <polyline points="9 18 15 12 9 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
           </svg>
           Source excerpt
         </summary>
-        <p className="mt-1.5 text-[10px] text-[#4B5563] leading-relaxed italic px-1"
-          style={{ borderLeft: "2px solid rgba(255,255,255,0.08)", paddingLeft: "8px" }}>
+        <p className="mt-1.5 text-[10px] text-text-quaternary leading-relaxed italic px-1"
+          style={{ borderLeft: "2px solid var(--color-border-default)", paddingLeft: "8px" }}>
           {extracted.raw_excerpt || "—"}
         </p>
       </details>
@@ -392,9 +392,9 @@ function RecordCard({ record, onApproval, onUpdate }: RecordCardProps) {
           onClick={() => onApproval(key, "approved")}
           className="flex-1 py-2 rounded-lg text-xs font-bold transition-all"
           style={{
-            background: approval === "approved" ? "rgba(16,185,129,0.2)" : "rgba(16,185,129,0.06)",
-            color: "#10B981",
-            border: `1px solid ${approval === "approved" ? "rgba(16,185,129,0.4)" : "rgba(16,185,129,0.15)"}`,
+            background: approval === "approved" ? "color-mix(in srgb, var(--color-success) 20%, transparent)" : "color-mix(in srgb, var(--color-success) 6%, transparent)",
+            color: "var(--color-success)",
+            border: `1px solid ${approval === "approved" ? "color-mix(in srgb, var(--color-success) 40%, transparent)" : "color-mix(in srgb, var(--color-success) 15%, transparent)"}`,
           }}>
           {approval === "approved" ? "✓ Approved" : "Approve"}
         </button>
@@ -402,9 +402,9 @@ function RecordCard({ record, onApproval, onUpdate }: RecordCardProps) {
           onClick={() => onApproval(key, "rejected")}
           className="flex-1 py-2 rounded-lg text-xs font-bold transition-all"
           style={{
-            background: approval === "rejected" ? "rgba(239,68,68,0.15)" : "rgba(239,68,68,0.04)",
-            color: "#F87171",
-            border: `1px solid ${approval === "rejected" ? "rgba(239,68,68,0.35)" : "rgba(239,68,68,0.12)"}`,
+            background: approval === "rejected" ? "color-mix(in srgb, var(--color-danger) 15%, transparent)" : "color-mix(in srgb, var(--color-danger) 4%, transparent)",
+            color: "var(--color-danger-soft)",
+            border: `1px solid ${approval === "rejected" ? "color-mix(in srgb, var(--color-danger) 35%, transparent)" : "color-mix(in srgb, var(--color-danger) 12%, transparent)"}`,
           }}>
           {approval === "rejected" ? "✕ Rejected" : "Reject"}
         </button>
@@ -440,10 +440,10 @@ function TagEditor({ tags, onChange }: TagEditorProps) {
       {tags.map((tag) => (
         <span key={tag}
           className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full"
-          style={{ background: "rgba(255,255,255,0.05)", color: "#9CA3AF", border: "1px solid rgba(255,255,255,0.08)" }}>
+          style={{ background: "var(--color-surface-overlay-strong)", color: "var(--color-text-secondary)", border: "1px solid var(--color-border-default)" }}>
           {tag}
           <button onClick={() => removeTag(tag)}
-            className="text-[#6B7280] hover:text-[#9CA3AF] transition-colors leading-none"
+            className="text-text-tertiary hover:text-text-secondary transition-colors leading-none"
             aria-label={`Remove tag ${tag}`}>
             ×
           </button>
@@ -464,7 +464,7 @@ function TagEditor({ tags, onChange }: TagEditorProps) {
         }}
         onBlur={() => { if (input.trim()) addTag(input); }}
         placeholder={tags.length === 0 ? "Add tags…" : "+"}
-        className="text-[10px] text-[#9CA3AF] bg-transparent focus:outline-none"
+        className="text-[10px] text-text-secondary bg-transparent focus:outline-none"
         style={{ width: input.length > 0 ? `${Math.max(60, input.length * 8)}px` : "50px", minWidth: "40px" }}
       />
     </div>

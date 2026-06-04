@@ -36,10 +36,10 @@ function ConfidenceBadge({
       className="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide flex-shrink-0"
       style={{
         background: isLow
-          ? "rgba(239,68,68,0.1)"
-          : "rgba(245,158,11,0.1)",
-        color: isLow ? "#F87171" : "#F59E0B",
-        border: `1px solid ${isLow ? "rgba(239,68,68,0.2)" : "rgba(245,158,11,0.2)"}`,
+          ? "color-mix(in srgb, var(--color-danger) 10%, transparent)"
+          : "color-mix(in srgb, var(--color-accent) 10%, transparent)",
+        color: isLow ? "var(--color-danger-soft)" : "var(--color-accent)",
+        border: `1px solid ${isLow ? "color-mix(in srgb, var(--color-danger) 20%, transparent)" : "color-mix(in srgb, var(--color-accent) 20%, transparent)"}`,
       }}
     >
       {isLow ? (required ? "Required" : "Low") : "Review"}
@@ -49,10 +49,10 @@ function ConfidenceBadge({
 
 function fieldBorder(conf: FieldConfidence, isEmpty: boolean): string {
   if (isEmpty || conf === "low")
-    return "1px solid rgba(239,68,68,0.4)";
+    return "1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)";
   if (conf === "medium")
-    return "1px solid rgba(245,158,11,0.35)";
-  return "1px solid rgba(255,255,255,0.08)";
+    return "1px solid color-mix(in srgb, var(--color-accent) 35%, transparent)";
+  return "1px solid var(--color-border-default)";
 }
 
 // ----------------------------------------------------------------
@@ -82,9 +82,9 @@ function TagEditor({
           key={tag}
           className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full"
           style={{
-            background: "rgba(245,158,11,0.08)",
-            color: "#F59E0B",
-            border: "1px solid rgba(245,158,11,0.2)",
+            background: "color-mix(in srgb, var(--color-accent) 8%, transparent)",
+            color: "var(--color-accent)",
+            border: "1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)",
           }}
         >
           {tag}
@@ -113,7 +113,7 @@ function TagEditor({
         placeholder={tags.length === 0 ? "Add company…" : "+"}
         className="text-[10px] bg-transparent focus:outline-none"
         style={{
-          color: "#9CA3AF",
+          color: "var(--color-text-secondary)",
           width: input.length > 0 ? `${Math.max(80, input.length * 8)}px` : "80px",
           minWidth: "60px",
         }}
@@ -146,14 +146,14 @@ function VersioningPrompt({
     <div
       className="rounded-xl p-4 mb-4"
       style={{
-        background: "rgba(99,102,241,0.05)",
-        border: "1px solid rgba(99,102,241,0.2)",
+        background: "color-mix(in srgb, var(--color-info) 5%, transparent)",
+        border: "1px solid color-mix(in srgb, var(--color-info) 20%, transparent)",
       }}
     >
-      <p className="text-xs font-semibold text-[#818CF8] mb-1">
+      <p className="text-xs font-semibold text-info mb-1">
         Similar artifact{similar.length > 1 ? "s" : ""} found
       </p>
-      <p className="text-[10px] text-[#6B7280] mb-3">
+      <p className="text-[10px] text-text-tertiary mb-3">
         Is this an updated version of an existing artifact? If yes, the new
         file becomes the active version and the old one stays in history.
       </p>
@@ -168,20 +168,20 @@ function VersioningPrompt({
             style={{
               background:
                 selectedParent === a.id
-                  ? "rgba(99,102,241,0.12)"
-                  : "rgba(255,255,255,0.02)",
+                  ? "color-mix(in srgb, var(--color-info) 12%, transparent)"
+                  : "var(--color-surface-overlay-subtle)",
               border: `1px solid ${
                 selectedParent === a.id
-                  ? "rgba(99,102,241,0.4)"
-                  : "rgba(255,255,255,0.07)"
+                  ? "color-mix(in srgb, var(--color-info) 40%, transparent)"
+                  : "var(--color-border-subtle)"
               }`,
             }}
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs text-[#F8F4EC] font-medium truncate">
+              <span className="text-xs text-text-primary font-medium truncate">
                 {a.title ?? "Untitled"}
               </span>
-              <span className="text-[9px] text-[#374151] flex-shrink-0">
+              <span className="text-[9px] text-text-faint flex-shrink-0">
                 {new Date(a.uploaded_at).toLocaleDateString("en-US", {
                   month: "short",
                   year: "numeric",
@@ -189,12 +189,12 @@ function VersioningPrompt({
               </span>
             </div>
             {a.created_at_company && (
-              <span className="text-[9px] text-[#6B7280]">
+              <span className="text-[9px] text-text-tertiary">
                 {a.created_at_company}
               </span>
             )}
             {selectedParent === a.id && (
-              <p className="text-[9px] text-[#818CF8] mt-1 font-semibold">
+              <p className="text-[9px] text-info mt-1 font-semibold">
                 ✓ Will be saved as an update to this artifact
               </p>
             )}
@@ -203,7 +203,7 @@ function VersioningPrompt({
         {selectedParent && (
           <button
             onClick={() => onSelect(null)}
-            className="text-[10px] text-[#374151] hover:text-[#6B7280] transition-colors"
+            className="text-[10px] text-text-faint hover:text-text-tertiary transition-colors"
           >
             No — this is a new artifact
           </button>
@@ -304,19 +304,19 @@ export default function ArtifactCuration({
     <div
       className="rounded-2xl overflow-hidden"
       style={{
-        border: "1px solid rgba(245,158,11,0.25)",
-        background: "linear-gradient(160deg,#0E1628 0%,#080B14 100%)",
+        border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
+        background: "var(--gradient-surface-card)",
       }}
     >
       {/* Header */}
       <div
         className="px-6 py-4"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+        style={{ borderBottom: "1px solid var(--color-border-subtle)" }}
       >
-        <h2 className="text-base font-bold text-[#F8F4EC]">
+        <h2 className="text-base font-bold text-text-primary">
           Review before saving to vault
         </h2>
-        <p className="text-xs text-[#6B7280] mt-0.5">
+        <p className="text-xs text-text-tertiary mt-0.5">
           AI pre-filled these fields. Edit anything before saving — flagged
           fields require your input.
         </p>
@@ -333,7 +333,7 @@ export default function ArtifactCuration({
         {/* Title */}
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-[#6B7280]">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-text-tertiary">
               Title
             </label>
             <ConfidenceBadge level={conf.title} required />
@@ -343,12 +343,12 @@ export default function ArtifactCuration({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             maxLength={80}
-            className="w-full text-sm font-semibold text-[#F8F4EC] bg-transparent rounded-lg px-3 py-2 focus:outline-none"
+            className="w-full text-sm font-semibold text-text-primary bg-transparent rounded-lg px-3 py-2 focus:outline-none"
             style={{ border: fieldBorder(conf.title, titleEmpty) }}
             placeholder="Deck title"
           />
           {titleEmpty && (
-            <p className="text-[10px] text-red-400 mt-1">
+            <p className="text-[10px] text-danger-soft mt-1">
               Title is required before saving.
             </p>
           )}
@@ -357,7 +357,7 @@ export default function ArtifactCuration({
         {/* Summary */}
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-[#6B7280]">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-text-tertiary">
               Summary
             </label>
             <ConfidenceBadge level={conf.summary} required />
@@ -366,12 +366,12 @@ export default function ArtifactCuration({
             value={summary}
             onChange={(e) => setSummary(e.target.value)}
             rows={3}
-            className="w-full text-xs text-[#9CA3AF] bg-transparent rounded-lg px-3 py-2 resize-none focus:outline-none"
+            className="w-full text-xs text-text-secondary bg-transparent rounded-lg px-3 py-2 resize-none focus:outline-none"
             style={{ border: fieldBorder(conf.summary, summaryEmpty) }}
             placeholder="What does this deck cover, who is the audience, and what is its purpose?"
           />
           {summaryEmpty && (
-            <p className="text-[10px] text-red-400 mt-1">
+            <p className="text-[10px] text-danger-soft mt-1">
               Summary is required before saving.
             </p>
           )}
@@ -380,7 +380,7 @@ export default function ArtifactCuration({
         {/* Why it matters */}
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-[#6B7280]">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-text-tertiary">
               Why it matters
             </label>
             <ConfidenceBadge level={conf.why_it_matters} required />
@@ -389,12 +389,12 @@ export default function ArtifactCuration({
             value={whyItMatters}
             onChange={(e) => setWhyItMatters(e.target.value)}
             rows={2}
-            className="w-full text-xs text-[#9CA3AF] bg-transparent rounded-lg px-3 py-2 resize-none focus:outline-none"
+            className="w-full text-xs text-text-secondary bg-transparent rounded-lg px-3 py-2 resize-none focus:outline-none"
             style={{ border: fieldBorder(conf.why_it_matters, whyEmpty) }}
             placeholder="What does this artifact demonstrate about your skills, judgment, or impact?"
           />
           {whyEmpty && (
-            <p className="text-[10px] text-red-400 mt-1">
+            <p className="text-[10px] text-danger-soft mt-1">
               Required before saving.
             </p>
           )}
@@ -403,7 +403,7 @@ export default function ArtifactCuration({
         {/* Created at company */}
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-[#6B7280]">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-text-tertiary">
               Created at
             </label>
             <ConfidenceBadge level={conf.created_at_company} />
@@ -412,7 +412,7 @@ export default function ArtifactCuration({
             type="text"
             value={createdAt}
             onChange={(e) => setCreatedAt(e.target.value)}
-            className="w-full text-xs text-[#9CA3AF] bg-transparent rounded-lg px-3 py-2 focus:outline-none"
+            className="w-full text-xs text-text-secondary bg-transparent rounded-lg px-3 py-2 focus:outline-none"
             style={{ border: fieldBorder(conf.created_at_company, false) }}
             placeholder="Company where this was created (optional)"
           />
@@ -421,7 +421,7 @@ export default function ArtifactCuration({
         {/* Used at companies */}
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-[#6B7280]">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-text-tertiary">
               Used at
             </label>
             <ConfidenceBadge level={conf.used_at_companies} />
@@ -432,7 +432,7 @@ export default function ArtifactCuration({
           >
             <TagEditor tags={usedAt} onChange={setUsedAt} />
           </div>
-          <p className="text-[9px] text-[#374151] mt-1">
+          <p className="text-[9px] text-text-faint mt-1">
             Companies this was presented to or used with. Press Enter or comma to add.
           </p>
         </div>
@@ -442,20 +442,20 @@ export default function ArtifactCuration({
       <div
         className="px-6 py-4 flex items-center justify-between gap-4"
         style={{
-          borderTop: "1px solid rgba(255,255,255,0.06)",
+          borderTop: "1px solid var(--color-border-subtle)",
           background: "rgba(0,0,0,0.2)",
         }}
       >
         <div className="flex items-center gap-3">
           {saveError && (
-            <p className="text-xs text-red-400">{saveError}</p>
+            <p className="text-xs text-danger-soft">{saveError}</p>
           )}
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={onDismiss}
-            className="text-xs text-[#374151] hover:text-[#6B7280] transition-colors px-3 py-2"
+            className="text-xs text-text-faint hover:text-text-tertiary transition-colors px-3 py-2"
           >
             Discard
           </button>
@@ -464,8 +464,8 @@ export default function ArtifactCuration({
             disabled={saving || !canSave}
             className="px-5 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-90 disabled:opacity-40"
             style={{
-              background: "linear-gradient(135deg,#F59E0B 0%,#FCD34D 100%)",
-              color: "#080B14",
+              background: "var(--gradient-accent)",
+              color: "var(--color-surface-base)",
             }}
           >
             {saving ? "Saving…" : "Save to vault →"}

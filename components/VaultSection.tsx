@@ -81,8 +81,8 @@ export default function VaultSection({ artifacts }: Props) {
     <div
       className="rounded-2xl p-6"
       style={{
-        background: "linear-gradient(160deg,#0E1628 0%,#080B14 100%)",
-        border: "1px solid rgba(255,255,255,0.07)",
+        background: "var(--gradient-surface-card)",
+        border: "1px solid var(--color-border-subtle)",
       }}
     >
       {/* Section header */}
@@ -90,13 +90,13 @@ export default function VaultSection({ artifacts }: Props) {
         <div>
           <div className="flex items-center gap-2">
             {/* Lock icon */}
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style={{ color: "#F59E0B" }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style={{ color: "var(--color-accent)" }}>
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" strokeWidth="2"/>
               <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
             </svg>
-            <h2 className="text-base font-bold text-[#F8F4EC]">Vault</h2>
+            <h2 className="text-base font-bold text-text-primary">Vault</h2>
           </div>
-          <p className="text-xs text-[#6B7280] mt-0.5">
+          <p className="text-xs text-text-tertiary mt-0.5">
             Decks, contracts, comp plans — stored, hashed, and provably yours.
           </p>
         </div>
@@ -110,7 +110,7 @@ export default function VaultSection({ artifacts }: Props) {
               viewBox="0 0 24 24"
               fill="none"
               className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
-              style={{ color: "#374151" }}
+              style={{ color: "var(--color-text-faint)" }}
             >
               <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
               <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
@@ -122,8 +122,8 @@ export default function VaultSection({ artifacts }: Props) {
               placeholder="Search vault…"
               className="text-xs bg-transparent rounded-lg pl-7 pr-3 py-1.5 focus:outline-none"
               style={{
-                border: "1px solid rgba(255,255,255,0.08)",
-                color: "#9CA3AF",
+                border: "1px solid var(--color-border-default)",
+                color: "var(--color-text-secondary)",
                 width: "160px",
               }}
             />
@@ -137,20 +137,20 @@ export default function VaultSection({ artifacts }: Props) {
           <div
             className="rounded-xl px-4 py-3 flex items-center gap-2"
             style={{
-              background: "rgba(16,185,129,0.08)",
-              border: "1px solid rgba(16,185,129,0.2)",
+              background: "color-mix(in srgb, var(--color-success) 8%, transparent)",
+              border: "1px solid color-mix(in srgb, var(--color-success) 20%, transparent)",
             }}
           >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
               <polyline
                 points="20 6 9 17 4 12"
-                stroke="#10B981"
+                stroke="var(--color-success)"
                 strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
             </svg>
-            <p className="text-xs text-[#10B981] font-semibold">
+            <p className="text-xs text-success font-semibold">
               Artifact saved to vault.
             </p>
           </div>
@@ -176,7 +176,7 @@ export default function VaultSection({ artifacts }: Props) {
                 <div className="flex items-center gap-2 mb-3">
                   <h3
                     className="text-[10px] font-bold uppercase tracking-widest"
-                    style={{ color: "#6B7280" }}
+                    style={{ color: "var(--color-text-tertiary)" }}
                   >
                     {TYPE_LABELS[type] ?? type} · {typeArtifacts.length}
                   </h3>
@@ -195,9 +195,9 @@ export default function VaultSection({ artifacts }: Props) {
         {!hasArtifacts && !pendingResult && (
           <div
             className="rounded-xl p-6 text-center"
-            style={{ border: "1px dashed rgba(255,255,255,0.06)" }}
+            style={{ border: "1px dashed var(--color-border-subtle)" }}
           >
-            <p className="text-xs text-[#374151]">
+            <p className="text-xs text-text-faint">
               No artifacts yet. Upload a deck or document above.
             </p>
           </div>
@@ -206,7 +206,7 @@ export default function VaultSection({ artifacts }: Props) {
         {/* Search zero state */}
         {hasArtifacts && filtered.length === 0 && searchQuery && (
           <div className="text-center py-4">
-            <p className="text-xs text-[#374151]">
+            <p className="text-xs text-text-faint">
               No artifacts match &ldquo;{searchQuery}&rdquo;.
             </p>
           </div>

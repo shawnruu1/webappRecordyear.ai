@@ -36,9 +36,9 @@ export default function WinLogger() {
 
   return (
     <div className="rounded-2xl p-6"
-      style={{ background: "linear-gradient(160deg,#0E1628 0%,#080B14 100%)", border: "1px solid rgba(245,158,11,0.15)" }}>
-      <h2 className="text-base font-bold text-[#F8F4EC] mb-1">Log a win</h2>
-      <p className="text-xs text-[#6B7280] mb-4">
+      style={{ background: "var(--gradient-surface-card)", border: "1px solid color-mix(in srgb, var(--color-accent) 15%, transparent)" }}>
+      <h2 className="text-base font-bold text-text-primary mb-1">Log a win</h2>
+      <p className="text-xs text-text-tertiary mb-4">
         Paste one win or many. AI splits and enriches each one separately.
       </p>
 
@@ -48,29 +48,29 @@ export default function WinLogger() {
           onChange={(e) => setInput(e.target.value)}
           placeholder={`One win:\nClosed Acme Corp at $120K ARR. Multi-threaded exec team, navigated legal + IT review.\n\nOr paste a whole list — AI will split them automatically.`}
           rows={5}
-          className="w-full px-4 py-3 rounded-xl text-sm text-[#F8F4EC] placeholder-[#374151] resize-none focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/40"
-          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+          className="w-full px-4 py-3 rounded-xl text-sm text-text-primary placeholder-text-faint resize-none focus:outline-none focus:ring-2 focus:ring-accent/40"
+          style={{ background: "var(--color-surface-overlay)", border: "1px solid var(--color-border-default)" }}
         />
         <button type="submit" disabled={loading || !input.trim()}
           className="px-6 py-2.5 rounded-xl text-sm font-bold transition-all hover:opacity-90 disabled:opacity-40"
-          style={{ background: "linear-gradient(135deg,#F59E0B 0%,#FCD34D 100%)", color: "#080B14" }}>
+          style={{ background: "var(--gradient-accent)", color: "var(--color-surface-base)" }}>
           {loading ? "Processing..." : "Log win →"}
         </button>
       </form>
 
       {error && (
-        <div className="mt-4 p-3 rounded-xl" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
-          <p className="text-xs text-red-400">{error}</p>
+        <div className="mt-4 p-3 rounded-xl" style={{ background: "color-mix(in srgb, var(--color-danger) 8%, transparent)", border: "1px solid color-mix(in srgb, var(--color-danger) 20%, transparent)" }}>
+          <p className="text-xs text-danger-soft">{error}</p>
         </div>
       )}
 
       {logged && logged.length > 0 && (
-        <div className="mt-4 p-3 rounded-xl" style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)" }}>
-          <p className="text-xs text-[#10B981] font-semibold mb-1">
+        <div className="mt-4 p-3 rounded-xl" style={{ background: "color-mix(in srgb, var(--color-success) 8%, transparent)", border: "1px solid color-mix(in srgb, var(--color-success) 20%, transparent)" }}>
+          <p className="text-xs text-success font-semibold mb-1">
             ✓ {logged.length} {logged.length === 1 ? "win" : "wins"} logged
           </p>
           {logged.map((w, i) => (
-            <p key={i} className="text-xs text-[#6B7280] truncate">· {w.title}</p>
+            <p key={i} className="text-xs text-text-tertiary truncate">· {w.title}</p>
           ))}
         </div>
       )}

@@ -30,9 +30,9 @@ function TypeBadge({ mimeType }: { mimeType: string | null }) {
     <span
       className="text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wide flex-shrink-0"
       style={{
-        background: isPptx ? "rgba(129,140,248,0.1)" : "rgba(239,68,68,0.1)",
-        color: isPptx ? "#818CF8" : "#F87171",
-        border: `1px solid ${isPptx ? "rgba(129,140,248,0.2)" : "rgba(239,68,68,0.2)"}`,
+        background: isPptx ? "color-mix(in srgb, var(--color-info) 10%, transparent)" : "color-mix(in srgb, var(--color-danger) 10%, transparent)",
+        color: isPptx ? "var(--color-info)" : "var(--color-danger-soft)",
+        border: `1px solid ${isPptx ? "color-mix(in srgb, var(--color-info) 20%, transparent)" : "color-mix(in srgb, var(--color-danger) 20%, transparent)"}`,
       }}
     >
       {label}
@@ -58,23 +58,23 @@ export default function ArtifactCard({ artifact }: Props) {
     <div
       className="rounded-xl p-4"
       style={{
-        background: "linear-gradient(160deg,#0E1628 0%,#080B14 100%)",
-        border: "1px solid rgba(245,158,11,0.12)",
+        background: "var(--gradient-surface-card)",
+        border: "1px solid color-mix(in srgb, var(--color-accent) 12%, transparent)",
       }}
     >
       {/* Header row: type badge + title + private badge */}
       <div className="flex items-start gap-2 mb-2">
         <TypeBadge mimeType={artifact.mime_type} />
-        <h3 className="text-sm font-semibold text-[#F8F4EC] flex-1 leading-snug">
+        <h3 className="text-sm font-semibold text-text-primary flex-1 leading-snug">
           {artifact.title ?? "Untitled"}
         </h3>
         {artifact.visibility === "private" && (
           <span
             className="text-[9px] font-semibold px-1.5 py-0.5 rounded flex-shrink-0 uppercase tracking-wide"
             style={{
-              background: "rgba(255,255,255,0.04)",
-              color: "#374151",
-              border: "1px solid rgba(255,255,255,0.07)",
+              background: "var(--color-surface-overlay)",
+              color: "var(--color-text-faint)",
+              border: "1px solid var(--color-border-subtle)",
             }}
           >
             Private
@@ -84,7 +84,7 @@ export default function ArtifactCard({ artifact }: Props) {
 
       {/* Why it matters */}
       {artifact.why_it_matters && (
-        <p className="text-xs text-[#9CA3AF] leading-relaxed mb-3">
+        <p className="text-xs text-text-secondary leading-relaxed mb-3">
           {artifact.why_it_matters}
         </p>
       )}
@@ -96,7 +96,7 @@ export default function ArtifactCard({ artifact }: Props) {
           open={summaryOpen}
           onToggle={(e) => setSummaryOpen((e.target as HTMLDetailsElement).open)}
         >
-          <summary className="text-[10px] text-[#374151] cursor-pointer hover:text-[#6B7280] transition-colors list-none flex items-center gap-1">
+          <summary className="text-[10px] text-text-faint cursor-pointer hover:text-text-tertiary transition-colors list-none flex items-center gap-1">
             <svg
               width="8"
               height="8"
@@ -113,7 +113,7 @@ export default function ArtifactCard({ artifact }: Props) {
             </svg>
             Summary
           </summary>
-          <p className="mt-1.5 text-[10px] text-[#6B7280] leading-relaxed pl-3">
+          <p className="mt-1.5 text-[10px] text-text-tertiary leading-relaxed pl-3">
             {artifact.description}
           </p>
         </details>
@@ -127,9 +127,9 @@ export default function ArtifactCard({ artifact }: Props) {
               key={company}
               className="text-[9px] px-2 py-0.5 rounded-full"
               style={{
-                background: "rgba(245,158,11,0.06)",
-                color: "#F59E0B",
-                border: "1px solid rgba(245,158,11,0.15)",
+                background: "color-mix(in srgb, var(--color-accent) 6%, transparent)",
+                color: "var(--color-accent)",
+                border: "1px solid color-mix(in srgb, var(--color-accent) 15%, transparent)",
               }}
             >
               {company}
@@ -142,13 +142,13 @@ export default function ArtifactCard({ artifact }: Props) {
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-3">
           {/* Upload date */}
-          <span className="text-[10px] text-[#374151]">
+          <span className="text-[10px] text-text-faint">
             {formatDate(artifact.uploaded_at)}
           </span>
 
           {/* File size */}
           {artifact.file_size && (
-            <span className="text-[10px] text-[#374151]">
+            <span className="text-[10px] text-text-faint">
               {formatBytes(artifact.file_size)}
             </span>
           )}
@@ -158,9 +158,9 @@ export default function ArtifactCard({ artifact }: Props) {
             <span
               className="text-[9px] font-semibold px-1.5 py-0.5 rounded"
               style={{
-                background: "rgba(99,102,241,0.08)",
-                color: "#818CF8",
-                border: "1px solid rgba(99,102,241,0.15)",
+                background: "color-mix(in srgb, var(--color-info) 8%, transparent)",
+                color: "var(--color-info)",
+                border: "1px solid color-mix(in srgb, var(--color-info) 15%, transparent)",
               }}
             >
               Updated
@@ -173,7 +173,7 @@ export default function ArtifactCard({ artifact }: Props) {
           <span
             title={`SHA-256: ${artifact.source_hash}`}
             className="flex items-center gap-1 text-[9px] font-mono cursor-default"
-            style={{ color: "#374151" }}
+            style={{ color: "var(--color-text-faint)" }}
           >
             <svg width="9" height="9" viewBox="0 0 24 24" fill="none">
               <path
