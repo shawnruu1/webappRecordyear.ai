@@ -1,8 +1,102 @@
 @import "tailwindcss";
 
+/* ============================================================
+   RecordYear.ai — Design tokens
+   Single source of truth for color, type, spacing, radius, and
+   shadow. Authored against DESIGN.md. Tailwind v4 @theme emits
+   every entry as a :root custom property AND (for known
+   namespaces) generates utilities, so each token is usable both
+   as a class (bg-surface-raised, text-text-secondary) and via
+   var(--color-…) inside inline styles.
+
+   This file is additive: it does not override Tailwind's default
+   text-*/spacing/radius/color scales, so existing markup keeps
+   rendering identically until values are migrated.
+   ============================================================ */
+
 @theme {
-  --color-gold: #F59E0B;
-  --color-gold-light: #FCD34D;
-  --color-navy: #080B14;
-  --color-navy-card: #0E1628;
+  /* ----- Typeface ----- */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* ===== Color — surfaces ===== */
+  --color-surface-base: #080b14; /* app background */
+  --color-surface-raised: #0e1628; /* cards / elevated panels */
+  --color-surface-overlay-subtle: rgba(255, 255, 255, 0.02);
+  --color-surface-overlay: rgba(255, 255, 255, 0.04);
+  --color-surface-overlay-strong: rgba(255, 255, 255, 0.05);
+
+  /* ===== Color — text ===== */
+  --color-text-primary: #f8f4ec; /* cream — headings / primary */
+  --color-text-secondary: #9ca3af;
+  --color-text-tertiary: #6b7280; /* most body / meta copy */
+  --color-text-quaternary: #4b5563;
+  --color-text-faint: #374151; /* disabled / faintest meta */
+
+  /* ===== Color — borders ===== */
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
+  --color-border-default: rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.1);
+
+  /* ===== Color — accent (gold) ===== */
+  --color-accent: #f59e0b; /* solid — use /opacity modifiers for alpha */
+  --color-accent-strong: #fcd34d; /* lighter gold — gradient end / hover */
+
+  /* ===== Color — semantic ===== */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-danger-soft: #f87171;
+  --color-info: #818cf8;
+
+  /* ===== Type scale — semantic, additive (does NOT touch text-xs/sm/base) ===== */
+  --text-display: 3rem; /* 48px — landing hero */
+  --text-display--line-height: 1.05;
+  --text-display--letter-spacing: -0.02em;
+  --text-title: 1.875rem; /* 30px — page H1 */
+  --text-title--line-height: 1.15;
+  --text-title--letter-spacing: -0.01em;
+  --text-heading: 1.125rem; /* 18px — section heading */
+  --text-heading--line-height: 1.3;
+  --text-body: 0.875rem; /* 14px — body */
+  --text-body--line-height: 1.5;
+  --text-caption: 0.75rem; /* 12px — captions */
+  --text-caption--line-height: 1.4;
+  --text-micro: 0.625rem; /* 10px — meta / labels */
+  --text-micro--line-height: 1.3;
+
+  /* ===== Spacing — semantic, additive (p-gutter, gap-section, …) ===== */
+  --spacing-gutter: 1.5rem; /* 24px — page gutter */
+  --spacing-section: 2.5rem; /* 40px — between sections */
+  --spacing-page: 4rem; /* 64px — page top/bottom padding */
+
+  /* ===== Radius — semantic, additive (rounded-control / -card / -pill) ===== */
+  --radius-control: 0.75rem; /* 12px — inputs & buttons */
+  --radius-card: 1rem; /* 16px — cards & panels */
+  --radius-pill: 9999px;
+
+  /* ===== Shadows — soft & layered, per DESIGN.md (defined; applied later) ===== */
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.24);
+  --shadow-raised: 0 8px 32px rgba(0, 0, 0, 0.36);
+  --shadow-accent-glow: 0 0 0 1px rgba(245, 158, 11, 0.2),
+    0 8px 24px rgba(245, 158, 11, 0.12);
+}
+
+/* ----- Gradients -----
+   Plain custom properties (not a Tailwind color namespace).
+   Reference via var() in inline styles, e.g.
+   style={{ background: "var(--gradient-surface-card)" }} */
+:root {
+  --gradient-surface-card: linear-gradient(160deg, #0e1628 0%, #080b14 100%);
+  --gradient-accent: linear-gradient(135deg, #f59e0b 0%, #fcd34d 100%);
+}
+
+/* ----- Base typography -----
+   Inter is wired as --font-sans (above), which Tailwind preflight
+   applies as the base family. Enable the character variants here. */
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01", "ss03";
+  }
 }
