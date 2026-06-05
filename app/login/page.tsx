@@ -6,6 +6,13 @@ import { createClient } from "@/lib/supabase/client";
 import { ROLE_OPTIONS, DEFAULT_USER_ROLE } from "@/types";
 import type { UserRole } from "@/types";
 import Link from "next/link";
+import { playfair, dmSans } from "@/lib/marketingFonts";
+
+// Shared editorial field styling: cream field, warm-grey rule border that
+// darkens to ink on focus (no glow), ink text, square-ish corners.
+const FIELD_CLASS =
+  "w-full px-4 py-3 rounded-sm text-sm border border-[#D4CBC0] focus:border-[#0D0D0D] focus:outline-none";
+const FIELD_STYLE = { background: "#F2EDE4", color: "#0D0D0D" } as const;
 
 export default function LoginPage() {
   const router = useRouter();
@@ -65,25 +72,30 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#080B14] flex items-center justify-center px-6">
+    <div
+      className={`${dmSans.className} min-h-screen flex flex-col items-center justify-center px-6`}
+      style={{ background: "#F2EDE4" }}
+    >
       <div className="w-full max-w-sm">
-        <Link href="/" className="block text-center mb-10">
-          <span className="text-2xl font-bold text-[#F8F4EC]">
-            Record<span style={{ color: "#F59E0B" }}>Year</span>
+        <Link href="/" className="block text-center">
+          <span
+            className={`${playfair.className} text-2xl font-bold`}
+            style={{ color: "#0D0D0D" }}
+          >
+            RecordYear
           </span>
         </Link>
 
-        <div
-          className="rounded-2xl p-8"
-          style={{
-            background: "linear-gradient(160deg,#0E1628 0%,#080B14 100%)",
-            border: "1px solid rgba(255,255,255,0.08)",
-          }}
-        >
+        <div className="mt-14">
           {step === "email" ? (
             <>
-              <h1 className="text-xl font-bold text-[#F8F4EC] mb-2">Sign in</h1>
-              <p className="text-sm text-[#6B7280] mb-6">
+              <h1
+                className={`${playfair.className} text-4xl font-bold mb-2`}
+                style={{ color: "#0D0D0D" }}
+              >
+                Sign in
+              </h1>
+              <p className="text-sm mb-8" style={{ color: "#6B6560" }}>
                 We&rsquo;ll email you a sign-in code.
               </p>
 
@@ -94,16 +106,14 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
                   required
-                  className="w-full px-4 py-3 rounded-xl text-sm text-[#F8F4EC] placeholder-[#4B5563] focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/40"
-                  style={{
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                  }}
+                  className={`${FIELD_CLASS} placeholder-[#A39C94]`}
+                  style={FIELD_STYLE}
                 />
                 <div>
                   <label
                     htmlFor="role"
-                    className="block text-xs text-[#6B7280] mb-1.5"
+                    className="block text-xs mb-1.5"
+                    style={{ color: "#6B6560" }}
                   >
                     What best describes your work?
                   </label>
@@ -111,32 +121,26 @@ export default function LoginPage() {
                     id="role"
                     value={role}
                     onChange={(e) => setRole(e.target.value as UserRole)}
-                    className="w-full px-4 py-3 rounded-xl text-sm text-[#F8F4EC] focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/40 appearance-none"
-                    style={{
-                      background: "rgba(255,255,255,0.05)",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                    }}
+                    className={`${FIELD_CLASS} appearance-none`}
+                    style={FIELD_STYLE}
                   >
                     {ROLE_OPTIONS.map((opt) => (
-                      <option
-                        key={opt.value}
-                        value={opt.value}
-                        className="bg-[#0E1628] text-[#F8F4EC]"
-                      >
+                      <option key={opt.value} value={opt.value}>
                         {opt.label}
                       </option>
                     ))}
                   </select>
                 </div>
-                {error && <p className="text-sm text-red-400">{error}</p>}
+                {error && (
+                  <p className="text-sm" style={{ color: "#B42318" }}>
+                    {error}
+                  </p>
+                )}
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 rounded-xl text-sm font-bold transition-all hover:opacity-90 disabled:opacity-50"
-                  style={{
-                    background: "linear-gradient(135deg,#F59E0B 0%,#FCD34D 100%)",
-                    color: "#080B14",
-                  }}
+                  className="w-full py-3 rounded-sm text-sm font-medium transition-opacity hover:opacity-90 disabled:opacity-50"
+                  style={{ background: "#0D0D0D", color: "#F2EDE4" }}
                 >
                   {loading ? "Sending..." : "Send code →"}
                 </button>
@@ -144,10 +148,15 @@ export default function LoginPage() {
             </>
           ) : (
             <>
-              <h1 className="text-xl font-bold text-[#F8F4EC] mb-2">Enter your code</h1>
-              <p className="text-sm text-[#6B7280] mb-6">
+              <h1
+                className={`${playfair.className} text-4xl font-bold mb-2`}
+                style={{ color: "#0D0D0D" }}
+              >
+                Enter your code
+              </h1>
+              <p className="text-sm mb-8" style={{ color: "#6B6560" }}>
                 We sent a sign-in code to{" "}
-                <span className="text-[#F8F4EC]">{email}</span>.
+                <span style={{ color: "#0D0D0D" }}>{email}</span>.
               </p>
 
               <form onSubmit={handleCodeSubmit} className="space-y-4">
@@ -161,29 +170,32 @@ export default function LoginPage() {
                   placeholder="00000000"
                   required
                   autoFocus
-                  className="w-full px-4 py-3 rounded-xl text-sm text-[#F8F4EC] placeholder-[#4B5563] focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/40 tracking-[0.5em] text-center font-mono"
-                  style={{
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                  }}
+                  className={`${FIELD_CLASS} placeholder-[#A39C94] tracking-[0.5em] text-center font-mono`}
+                  style={FIELD_STYLE}
                 />
-                {error && <p className="text-sm text-red-400">{error}</p>}
+                {error && (
+                  <p className="text-sm" style={{ color: "#B42318" }}>
+                    {error}
+                  </p>
+                )}
                 <button
                   type="submit"
                   disabled={loading || code.length !== 8}
-                  className="w-full py-3 rounded-xl text-sm font-bold transition-all hover:opacity-90 disabled:opacity-50"
-                  style={{
-                    background: "linear-gradient(135deg,#F59E0B 0%,#FCD34D 100%)",
-                    color: "#080B14",
-                  }}
+                  className="w-full py-3 rounded-sm text-sm font-medium transition-opacity hover:opacity-90 disabled:opacity-50"
+                  style={{ background: "#0D0D0D", color: "#F2EDE4" }}
                 >
                   {loading ? "Verifying..." : "Sign in →"}
                 </button>
               </form>
 
               <button
-                onClick={() => { setStep("email"); setCode(""); setError(""); }}
-                className="mt-4 w-full text-xs text-[#6B7280] hover:text-[#F8F4EC] transition-colors"
+                onClick={() => {
+                  setStep("email");
+                  setCode("");
+                  setError("");
+                }}
+                className="mt-6 w-full text-xs transition-colors hover:text-[#0D0D0D]"
+                style={{ color: "#6B6560" }}
               >
                 Use a different email
               </button>
