@@ -187,14 +187,7 @@ export default function FileUploader({ onResults }: Props) {
   const allDone = hasEntries && entries.every((e) => e.status === "done" || e.status === "error");
 
   return (
-    <div
-      className="rounded-2xl p-6"
-      style={{
-        background: "var(--gradient-surface-card)",
-        border: `1px solid ${isDragging ? "color-mix(in srgb, var(--color-accent) 50%, transparent)" : "color-mix(in srgb, var(--color-accent) 15%, transparent)"}`,
-        transition: "border-color 0.15s ease",
-      }}
-    >
+    <div>
       <h2 className="text-base font-bold text-text-primary mb-1">Upload a file</h2>
       <p className="text-xs text-text-tertiary mb-4">
         Screenshots, PDFs, CRM exports. AI extracts every win automatically.

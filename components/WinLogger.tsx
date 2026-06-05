@@ -37,9 +37,8 @@ export default function WinLogger() {
   };
 
   return (
-    <div className="rounded-2xl p-6"
-      style={{ background: "var(--gradient-surface-card)", border: "1px solid color-mix(in srgb, var(--color-accent) 15%, transparent)" }}>
-      <h2 className="text-base font-bold text-text-primary mb-1">Log a win</h2>
+    <div>
+      <h2 className="text-base font-bold text-text-primary mb-1">Write a win</h2>
       <p className="text-xs text-text-tertiary mb-4">
         Paste one win or many. AI splits and enriches each one separately.
       </p>

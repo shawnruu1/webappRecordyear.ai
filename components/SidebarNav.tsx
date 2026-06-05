@@ -91,13 +91,13 @@ export default function SidebarNav() {
             aria-current={active ? "page" : undefined}
             className={`relative flex items-center gap-3 rounded-control px-3 py-2 text-sm font-medium transition-colors ${
               active
-                ? "text-text-primary bg-surface-overlay"
+                ? "text-text-primary bg-surface-overlay-strong"
                 : "text-text-tertiary hover:text-text-secondary hover:bg-surface-overlay-subtle"
             }`}
           >
             {active && (
               <span
-                className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-accent"
+                className="absolute left-0 top-1 bottom-1 w-[2px] rounded-full bg-accent"
                 aria-hidden="true"
               />
             )}

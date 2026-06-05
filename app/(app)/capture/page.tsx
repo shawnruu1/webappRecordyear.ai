@@ -2,8 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import DashboardClient from "./DashboardClient";
 import VisibilityToggle from "@/components/VisibilityToggle";
-import UsernameClaim from "@/components/UsernameClaim";
-import type { Win, Artifact } from "@/types";
+import type { Win } from "@/types";
 import { categoryColor } from "@/lib/categoryColors";
 
 export default async function CapturePage() {
@@ -20,31 +19,10 @@ export default async function CapturePage() {
     .order("created_at", { ascending: false })
     .limit(50);
 
-  // Fetch vault artifacts for this user — non-archived, newest first
-  const { data: artifacts } = await supabase
-    .from("artifacts")
-    .select("*")
-    .eq("user_id", user.id)
-    .eq("archived", false)
-    .order("uploaded_at", { ascending: false });
-
-  // Profile — drives the username-claim prompt / public-link state.
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("username, display_name, public_profile_enabled")
-    .eq("id", user.id)
-    .maybeSingle();
-
   return (
     <div className="max-w-2xl mx-auto px-6 py-10 space-y-8">
-      {/* Public profile — claim prompt or live link */}
-      <UsernameClaim
-        initialUsername={profile?.username ?? null}
-        initialDisplayName={profile?.display_name ?? null}
-      />
-
-      {/* Interactive top section — wins + vault */}
-      <DashboardClient initialArtifacts={(artifacts ?? []) as Artifact[]} />
+      {/* Capture — write a win or upload a file */}
+      <DashboardClient />
 
       {/* Win feed — server-rendered, refreshed by router.refresh() after saves */}
       <div>

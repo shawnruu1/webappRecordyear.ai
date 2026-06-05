@@ -5,14 +5,9 @@ import { useRouter } from "next/navigation";
 import WinLogger from "@/components/WinLogger";
 import FileUploader from "@/components/FileUploader";
 import BatchApproval from "@/components/BatchApproval";
-import VaultSection from "@/components/VaultSection";
-import type { FileExtractionResult, Artifact } from "@/types";
+import type { FileExtractionResult } from "@/types";
 
-interface Props {
-  initialArtifacts: Artifact[];
-}
-
-export default function DashboardClient({ initialArtifacts }: Props) {
+export default function DashboardClient() {
   const router = useRouter();
   const [results, setResults] = useState<FileExtractionResult[]>([]);
   const [savedBanner, setSavedBanner] = useState<number | null>(null);
@@ -62,8 +57,26 @@ export default function DashboardClient({ initialArtifacts }: Props) {
         </div>
       )}
 
-      <WinLogger />
-      <FileUploader onResults={handleResults} />
+      {/* Capture — two zones in one card */}
+      <div
+        className="rounded-2xl"
+        style={{
+          background: "var(--gradient-surface-card)",
+          border: "1px solid color-mix(in srgb, var(--color-accent) 15%, transparent)",
+        }}
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2">
+          <div className="p-6">
+            <WinLogger />
+          </div>
+          <div
+            className="p-6 border-t sm:border-t-0 sm:border-l"
+            style={{ borderColor: "var(--color-border-subtle)" }}
+          >
+            <FileUploader onResults={handleResults} />
+          </div>
+        </div>
+      </div>
 
       {/* Empty-extraction notice — file was uploaded but no wins found */}
       {results.some((r) => r.status === "empty") && !hasApprovalQueue && (
@@ -95,9 +108,6 @@ export default function DashboardClient({ initialArtifacts }: Props) {
           onDismiss={handleDismiss}
         />
       )}
-
-      {/* Vault section — below wins logger */}
-      <VaultSection artifacts={initialArtifacts} />
     </div>
   );
 }
