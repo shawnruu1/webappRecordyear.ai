@@ -42,13 +42,22 @@ export default function Navbar() {
           </a>
         </div>
 
-        <Link
-          href="/login"
-          className="px-4 py-2 rounded-sm text-sm font-medium transition-opacity hover:opacity-90"
-          style={{ background: "var(--mkt-ink)", color: "var(--mkt-bg)" }}
-        >
-          Get early access
-        </Link>
+        <div className="flex items-center gap-5">
+          <Link
+            href="/login"
+            className="text-sm transition-colors hover:text-[#0D0D0D]"
+            style={{ color: "var(--mkt-ink-muted)" }}
+          >
+            Sign in
+          </Link>
+          <Link
+            href="/login"
+            className="px-4 py-2 rounded-sm text-sm font-medium transition-opacity hover:opacity-90"
+            style={{ background: "var(--mkt-ink)", color: "var(--mkt-bg)" }}
+          >
+            Get early access
+          </Link>
+        </div>
       </div>
     </nav>
   );
