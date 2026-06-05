@@ -199,13 +199,14 @@ export default function FileUploader({ onResults }: Props) {
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
-        className="relative flex flex-col items-center justify-center gap-2 rounded-xl cursor-pointer transition-all"
+        className={`relative flex flex-col items-center justify-center gap-2 rounded-lg cursor-pointer border-2 border-dashed transition-all ${
+          isDragging ? "border-accent/40" : "border-white/10 hover:border-white/20"
+        }`}
         style={{
           padding: "28px 20px",
           background: isDragging
             ? "color-mix(in srgb, var(--color-accent) 6%, transparent)"
             : "var(--color-surface-overlay-subtle)",
-          border: `1.5px dashed ${isDragging ? "color-mix(in srgb, var(--color-accent) 40%, transparent)" : "var(--color-border-strong)"}`,
           transition: "all 0.15s ease",
         }}
       >

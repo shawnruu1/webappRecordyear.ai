@@ -11,7 +11,7 @@ export default async function CapturePage() {
   if (!user) redirect("/login");
 
   return (
-    <div className="max-w-[860px] mx-auto px-6 mt-12">
+    <div className="w-full max-w-[860px] mx-auto px-6 mt-12">
       {/* Capture — write a win or upload a file. Logged wins live on /records. */}
       <DashboardClient />
     </div>
