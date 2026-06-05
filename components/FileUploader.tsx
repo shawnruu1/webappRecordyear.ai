@@ -188,9 +188,11 @@ export default function FileUploader({ onResults }: Props) {
 
   return (
     <div>
-      <h2 className="text-base font-bold text-text-primary mb-1">Upload a file</h2>
-      <p className="text-xs text-text-tertiary mb-4">
-        Screenshots, PDFs, CRM exports. AI extracts every win automatically.
+      <p className="text-xs font-medium text-text-secondary mb-3">
+        Attach evidence{" "}
+        <span className="text-text-faint font-normal">
+          — screenshot, PDF, or export. We&rsquo;ll pull the wins out.
+        </span>
       </p>
 
       {/* Drop zone */}
@@ -203,7 +205,7 @@ export default function FileUploader({ onResults }: Props) {
           isDragging ? "border-accent/40" : "border-white/10 hover:border-white/20"
         }`}
         style={{
-          padding: "28px 20px",
+          padding: "18px 20px",
           background: isDragging
             ? "color-mix(in srgb, var(--color-accent) 6%, transparent)"
             : "var(--color-surface-overlay-subtle)",

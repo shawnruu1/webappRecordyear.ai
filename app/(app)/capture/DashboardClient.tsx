@@ -74,24 +74,21 @@ export default function DashboardClient() {
         </div>
       )}
 
-      {/* Capture — two zones in one card */}
+      {/* Unified capture composer — the win text is the draft; files attach
+          beneath it as chips. No mode choice up front. */}
       <div
-        className="rounded-2xl"
+        className="rounded-2xl p-6"
         style={{
           background: "var(--gradient-surface-card)",
           border: "1px solid color-mix(in srgb, var(--color-accent) 15%, transparent)",
         }}
       >
-        <div className="grid grid-cols-2">
-          <div className="p-6">
-            <WinLogger onLogged={showToast} />
-          </div>
-          <div
-            className="p-6 border-l"
-            style={{ borderColor: "var(--color-border-subtle)" }}
-          >
-            <FileUploader onResults={handleResults} />
-          </div>
+        <WinLogger onLogged={showToast} />
+        <div
+          className="mt-6 pt-6"
+          style={{ borderTop: "1px solid var(--color-border-subtle)" }}
+        >
+          <FileUploader onResults={handleResults} />
         </div>
       </div>
 
@@ -112,7 +109,7 @@ export default function DashboardClient() {
             >
               log one manually
             </button>{" "}
-            using the text box on the left.
+            using the text box above.
           </p>
         </div>
       )}
