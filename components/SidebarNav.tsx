@@ -91,8 +91,8 @@ export default function SidebarNav() {
             aria-current={active ? "page" : undefined}
             className={`relative flex items-center gap-3 rounded-control px-3 py-2 text-sm font-medium transition-colors ${
               active
-                ? "text-text-primary bg-surface-overlay-strong"
-                : "text-text-tertiary hover:text-text-secondary hover:bg-surface-overlay-subtle"
+                ? "text-white bg-white/[0.07]"
+                : "text-white/75 hover:text-white hover:bg-white/[0.04]"
             }`}
           >
             {active && (

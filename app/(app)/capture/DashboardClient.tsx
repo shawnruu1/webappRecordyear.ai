@@ -1,16 +1,29 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
+import Link from "next/link";
 import WinLogger from "@/components/WinLogger";
 import FileUploader from "@/components/FileUploader";
 import BatchApproval from "@/components/BatchApproval";
 import type { FileExtractionResult } from "@/types";
 
 export default function DashboardClient() {
-  const router = useRouter();
   const [results, setResults] = useState<FileExtractionResult[]>([]);
-  const [savedBanner, setSavedBanner] = useState<number | null>(null);
+  const [toast, setToast] = useState<number | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Slim success toast, auto-dismissing after 4s. Shared by both success
+  // paths — text submit (WinLogger) and file upload → approve (BatchApproval).
+  function showToast(count: number) {
+    setToast(count);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setToast(null), 4000);
+  }
+
+  function dismissToast() {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    setToast(null);
+  }
 
   function handleResults(incoming: FileExtractionResult[]) {
     setResults((prev) => [...prev, ...incoming]);
@@ -18,10 +31,7 @@ export default function DashboardClient() {
 
   function handleSaved(count: number) {
     setResults([]);
-    setSavedBanner(count);
-    // Re-run the server component — refreshes wins and artifacts
-    router.refresh();
-    setTimeout(() => setSavedBanner(null), 4000);
+    showToast(count);
   }
 
   function handleDismiss() {
@@ -33,27 +43,34 @@ export default function DashboardClient() {
 
   return (
     <div className="space-y-6">
-      {/* Success banner */}
-      {savedBanner !== null && (
+      {/* Success toast — links to the records page, where wins now live */}
+      {toast !== null && (
         <div
-          className="rounded-xl px-4 py-3 flex items-center gap-2"
+          className="flex items-center justify-between gap-3 rounded-xl px-4 py-2.5"
           style={{
             background: "color-mix(in srgb, var(--color-success) 8%, transparent)",
             border: "1px solid color-mix(in srgb, var(--color-success) 20%, transparent)",
           }}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <polyline
-              points="20 6 9 17 4 12"
-              stroke="var(--color-success)"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <p className="text-xs text-success font-semibold">
-            {savedBanner} {savedBanner === 1 ? "win" : "wins"} added to your record.
+          <p className="text-xs font-medium text-text-secondary">
+            <span className="text-success font-semibold">✓</span>{" "}
+            {toast === 1 ? "Win logged" : `${toast} wins logged`} — view{" "}
+            {toast === 1 ? "it" : "them"} in{" "}
+            <Link
+              href="/records"
+              className="text-accent font-semibold hover:opacity-80 transition-opacity"
+            >
+              My Records →
+            </Link>
           </p>
+          <button
+            type="button"
+            onClick={dismissToast}
+            aria-label="Dismiss"
+            className="text-text-faint hover:text-text-tertiary transition-colors leading-none"
+          >
+            ✕
+          </button>
         </div>
       )}
 
@@ -67,7 +84,7 @@ export default function DashboardClient() {
       >
         <div className="grid grid-cols-1 sm:grid-cols-2">
           <div className="p-6">
-            <WinLogger />
+            <WinLogger onLogged={showToast} />
           </div>
           <div
             className="p-6 border-t sm:border-t-0 sm:border-l"
@@ -95,7 +112,7 @@ export default function DashboardClient() {
             >
               log one manually
             </button>{" "}
-            using the text box above.
+            using the text box on the left.
           </p>
         </div>
       )}

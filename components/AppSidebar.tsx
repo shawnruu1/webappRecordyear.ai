@@ -12,12 +12,12 @@ export default async function AppSidebar() {
 
   return (
     <aside
-      className="fixed inset-y-0 left-0 z-20 flex w-[220px] flex-col border-r bg-surface-base"
+      className="fixed inset-y-0 left-0 z-20 flex w-[220px] flex-col border-r bg-surface-sidebar"
       style={{ borderColor: "var(--color-border-subtle)" }}
     >
       {/* Wordmark */}
       <div className="px-5 py-5">
-        <span className="text-lg font-bold text-text-primary">
+        <span className="text-base font-semibold text-text-primary">
           Record<span style={{ color: "var(--color-accent)" }}>Year</span>
         </span>
       </div>

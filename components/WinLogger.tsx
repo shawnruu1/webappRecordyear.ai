@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import type { Win } from "@/types";
 
-export default function WinLogger() {
-  const router = useRouter();
+export default function WinLogger({
+  onLogged,
+}: {
+  onLogged?: (count: number) => void;
+}) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [logged, setLogged] = useState<Win[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -16,7 +17,6 @@ export default function WinLogger() {
     if (!input.trim()) return;
     setLoading(true);
     setError(null);
-    setLogged(null);
 
     const res = await fetch("/api/wins", {
       method: "POST",
@@ -26,9 +26,8 @@ export default function WinLogger() {
 
     if (res.ok) {
       const wins: Win[] = await res.json();
-      setLogged(wins);
       setInput("");
-      router.refresh();
+      onLogged?.(wins.length);
     } else {
       const body = await res.json().catch(() => ({}));
       setError(`Error ${res.status}: ${body.error ?? "Unknown error"}`);
@@ -62,17 +61,6 @@ export default function WinLogger() {
       {error && (
         <div className="mt-4 p-3 rounded-xl" style={{ background: "color-mix(in srgb, var(--color-danger) 8%, transparent)", border: "1px solid color-mix(in srgb, var(--color-danger) 20%, transparent)" }}>
           <p className="text-xs text-danger-soft">{error}</p>
-        </div>
-      )}
-
-      {logged && logged.length > 0 && (
-        <div className="mt-4 p-3 rounded-xl" style={{ background: "color-mix(in srgb, var(--color-success) 8%, transparent)", border: "1px solid color-mix(in srgb, var(--color-success) 20%, transparent)" }}>
-          <p className="text-xs text-success font-semibold mb-1">
-            ✓ {logged.length} {logged.length === 1 ? "win" : "wins"} logged
-          </p>
-          {logged.map((w, i) => (
-            <p key={i} className="text-xs text-text-tertiary truncate">· {w.title}</p>
-          ))}
         </div>
       )}
     </div>
