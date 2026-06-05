@@ -4,9 +4,9 @@ import { playfair } from "@/lib/marketingFonts";
 export default function Hero() {
   return (
     <section className="pt-36 pb-20" style={{ background: "var(--mkt-bg)" }}>
-      <div className="max-w-4xl mx-auto px-6 text-center">
+      <div className="max-w-4xl mx-auto px-6 text-center pt-16">
         <h1
-          className={`${playfair.className} font-black tracking-tight`}
+          className={`${playfair.className} font-black tracking-tight max-w-3xl mx-auto mb-10`}
           style={{
             color: "var(--mkt-ink)",
             fontSize: "clamp(3rem, 8vw, 7rem)",
@@ -19,7 +19,7 @@ export default function Hero() {
         </h1>
 
         <p
-          className="mx-auto mt-8 leading-relaxed"
+          className="mx-auto leading-relaxed"
           style={{ color: "var(--mkt-ink-muted)", fontSize: "18px", maxWidth: "540px" }}
         >
           RecordYear captures every win — deals closed, quotas hit, recognition
