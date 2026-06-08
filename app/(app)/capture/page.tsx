@@ -12,7 +12,14 @@ export default async function CapturePage() {
 
   return (
     <div className="w-full max-w-[860px] mx-auto px-6 mt-12">
-      {/* Capture — write a win or upload a file. Logged wins live on /records. */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-text-primary mb-2">Capture a win</h1>
+        <p className="text-sm text-text-tertiary">
+          Write it, or drop a screenshot, PDF, or export — we&rsquo;ll structure it
+          into your record.
+        </p>
+      </div>
+      {/* Logged wins live on /records. */}
       <DashboardClient />
     </div>
   );

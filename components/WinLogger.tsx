@@ -53,7 +53,7 @@ export default function WinLogger({
         />
         <button type="submit" disabled={loading || !input.trim()}
           className="px-6 py-2.5 rounded-xl text-sm font-bold transition-all hover:opacity-90 disabled:opacity-40"
-          style={{ background: "var(--gradient-accent)", color: "var(--color-surface-base)" }}>
+          style={{ background: "var(--color-accent)", color: "var(--color-surface-base)" }}>
           {loading ? "Processing..." : "Log win →"}
         </button>
       </form>
