@@ -12,6 +12,13 @@ import {
 } from "@/lib/portfolioFilters";
 import type { WinWithEditStatus, WinVersion, WinCategory } from "@/types";
 
+// Compact currency for the stats hero ($480K, $1.2M).
+function formatArr(n: number): string {
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `$${Math.round(n / 1_000)}K`;
+  return `$${n}`;
+}
+
 export default async function RecordsPage({
   searchParams,
 }: {
@@ -84,14 +91,13 @@ export default async function RecordsPage({
     (w) => deriveVerificationTier(w).tier !== "self_reported"
   ).length;
   const selfReported = total - withEvidence;
+  const totalArr = typedWins.reduce((sum, w) => sum + (w.arr_amount ?? 0), 0);
 
-  const summary = [
-    `${total} ${total === 1 ? "record" : "records"}`,
-    withEvidence > 0 ? `${withEvidence} with evidence` : null,
-    selfReported > 0 ? `${selfReported} self-reported` : null,
-  ]
-    .filter(Boolean)
-    .join(" · ");
+  const stats = [
+    { value: String(total), label: total === 1 ? "Record" : "Records" },
+    { value: String(withEvidence), label: "With evidence" },
+    { value: formatArr(totalArr), label: "ARR captured" },
+  ];
 
   // Fetch version history only for wins that have it — one round-trip
   const editedWinIds = typedWins
@@ -115,10 +121,31 @@ export default async function RecordsPage({
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-16">
-      {/* Header */}
+      {/* Header + stats hero */}
       <div className="mb-12">
-        <h1 className="text-3xl font-bold text-text-primary mb-2">Career Record</h1>
-        <p className="text-sm text-text-tertiary">{summary}</p>
+        <h1 className="text-3xl font-bold text-text-primary mb-6">Career Record</h1>
+        <div className="grid grid-cols-3 gap-3">
+          {stats.map((s) => (
+            <div
+              key={s.label}
+              className="rounded-xl p-4"
+              style={{
+                background: "var(--gradient-surface-card)",
+                border: "1px solid var(--color-border-subtle)",
+              }}
+            >
+              <p className="text-3xl font-bold text-text-primary leading-none">
+                {s.value}
+              </p>
+              <p className="text-[10px] uppercase tracking-widest text-text-faint mt-2">
+                {s.label}
+              </p>
+            </div>
+          ))}
+        </div>
+        {selfReported > 0 && (
+          <p className="text-xs text-text-faint mt-3">{selfReported} self-reported</p>
+        )}
       </div>
 
       <PortfolioFilterBar
