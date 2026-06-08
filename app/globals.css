@@ -21,7 +21,7 @@
 
   /* ===== Color — surfaces ===== */
   --color-surface-base: #080b14; /* app background */
-  --color-surface-sidebar: #111214; /* nav rail — one step lighter than base */
+  --color-surface-sidebar: #15171c; /* nav rail — distinct raised panel, lighter than base */
   --color-surface-raised: #0e1628; /* cards / elevated panels */
   --color-surface-overlay-subtle: rgba(255, 255, 255, 0.02);
   --color-surface-overlay: rgba(255, 255, 255, 0.04);

@@ -13,8 +13,13 @@ export default async function AppSidebar() {
 
   return (
     <aside
-      className="fixed inset-y-0 left-0 z-20 flex w-[220px] flex-col border-r bg-surface-sidebar"
-      style={{ borderColor: "var(--color-border-subtle)" }}
+      className="fixed inset-y-0 left-0 z-20 flex w-[220px] flex-col bg-surface-sidebar"
+      style={{
+        // Dark seam + soft falloff so the rail reads as a raised panel,
+        // not a hairline drawn on top of the content.
+        boxShadow:
+          "1px 0 0 rgba(0,0,0,0.55), 8px 0 24px -10px rgba(0,0,0,0.5)",
+      }}
     >
       {/* Wordmark */}
       <div className="px-5 py-5">
