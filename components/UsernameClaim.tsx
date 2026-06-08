@@ -128,7 +128,7 @@ export default function UsernameClaim({
             disabled={loading || username.length < 3}
             className="px-4 rounded-lg text-sm font-bold transition-all hover:opacity-90 disabled:opacity-50"
             style={{
-              background: "var(--gradient-accent)",
+              background: "var(--color-accent)",
               color: "var(--color-surface-base)",
             }}
           >

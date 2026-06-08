@@ -40,7 +40,7 @@
   --color-border-strong: rgba(255, 255, 255, 0.1);
 
   /* ===== Color — accent (gold) ===== */
-  --color-accent: #f59e0b; /* solid — use /opacity modifiers for alpha */
+  --color-accent: #c8960c; /* serious "on the record" gold — matches marketing --mkt-gold */
   --color-accent-strong: #fcd34d; /* lighter gold — gradient end / hover */
 
   /* ===== Color — semantic ===== */

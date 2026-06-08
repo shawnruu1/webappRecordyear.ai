@@ -12,6 +12,8 @@ import {
 } from "@/lib/portfolioFilters";
 import type { WinWithEditStatus, WinVersion, WinCategory } from "@/types";
 
+import { playfair } from "@/lib/marketingFonts";
+
 // Compact currency for the stats hero ($480K, $1.2M).
 function formatArr(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
@@ -124,7 +126,9 @@ export default async function RecordsPage({
     <div className="max-w-2xl mx-auto px-6 py-16">
       {/* Header + stats hero */}
       <div className="mb-12">
-        <h1 className="text-3xl font-bold text-text-primary mb-6">Career Record</h1>
+        <h1 className={`${playfair.className} text-3xl font-bold text-text-primary mb-6`}>
+          Career Record
+        </h1>
         <div className="grid grid-cols-3 gap-3">
           {stats.map((s) => (
             <div

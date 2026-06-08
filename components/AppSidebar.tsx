@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import SidebarNav from "@/components/SidebarNav";
 import SignOutButton from "@/components/SignOutButton";
+import { playfair } from "@/lib/marketingFonts";
 
 // Server component: reads the session server-side for the footer identity.
 // Interactive bits (active-state nav, sign out) live in client children.
@@ -17,8 +18,8 @@ export default async function AppSidebar() {
     >
       {/* Wordmark */}
       <div className="px-5 py-5">
-        <span className="text-base font-semibold text-text-primary">
-          Record<span style={{ color: "var(--color-accent)" }}>Year</span>
+        <span className={`${playfair.className} text-lg font-bold text-text-primary`}>
+          RecordYear
         </span>
       </div>
 

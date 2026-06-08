@@ -464,7 +464,7 @@ export default function ArtifactCuration({
             disabled={saving || !canSave}
             className="px-5 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-90 disabled:opacity-40"
             style={{
-              background: "var(--gradient-accent)",
+              background: "var(--color-accent)",
               color: "var(--color-surface-base)",
             }}
           >

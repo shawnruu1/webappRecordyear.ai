@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import UsernameClaim from "@/components/UsernameClaim";
+import { playfair } from "@/lib/marketingFonts";
 
 // Placeholder — identity + public-profile claim for now. Sharing and
 // settings get built out here next.
@@ -20,7 +21,9 @@ export default async function ProfilePage() {
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-16">
-      <h1 className="text-3xl font-bold text-text-primary mb-2">Profile</h1>
+      <h1 className={`${playfair.className} text-3xl font-bold text-text-primary mb-2`}>
+        Profile
+      </h1>
       <p className="text-sm text-text-tertiary mb-10">
         Your public profile and account.
       </p>

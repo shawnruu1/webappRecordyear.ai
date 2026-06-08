@@ -204,7 +204,7 @@ export default function BatchApproval({ results, onSaved, onDismiss }: Props) {
             onClick={handleSave}
             disabled={saving || approved.length === 0}
             className="px-5 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-90 disabled:opacity-40"
-            style={{ background: "var(--gradient-accent)", color: "var(--color-surface-base)" }}>
+            style={{ background: "var(--color-accent)", color: "var(--color-surface-base)" }}>
             {saving ? "Saving…" : `Save ${approved.length} approved →`}
           </button>
         </div>
