@@ -36,7 +36,7 @@ export default async function AppSidebar() {
       {/* Footer — identity + sign out */}
       <div
         className="flex flex-col gap-2 border-t px-5 py-4"
-        style={{ borderColor: "var(--color-border-subtle)" }}
+        style={{ borderColor: "rgba(0,0,0,0.3)" }}
       >
         {user?.email && (
           <span className="truncate text-xs text-text-faint" title={user.email}>
