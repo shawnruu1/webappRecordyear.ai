@@ -15,10 +15,10 @@ export default async function AppSidebar() {
     <aside
       className="fixed inset-y-0 left-0 z-20 flex w-[220px] flex-col bg-surface-sidebar"
       style={{
-        // Dark seam + soft falloff so the rail reads as a raised panel,
-        // not a hairline drawn on top of the content.
-        boxShadow:
-          "1px 0 0 rgba(0,0,0,0.55), 8px 0 24px -10px rgba(0,0,0,0.5)",
+        // On a dark UI a faint LIGHT edge delineates a panel far better than a
+        // dark seam (dark-on-dark reads as nothing); the shadow adds depth.
+        borderRight: "1px solid rgba(255,255,255,0.10)",
+        boxShadow: "8px 0 24px -12px rgba(0,0,0,0.55)",
       }}
     >
       {/* Wordmark */}
