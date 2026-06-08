@@ -310,15 +310,15 @@ function RecordCard({ record, onApproval, onUpdate }: RecordCardProps) {
           value={edited.title}
           onChange={(e) => onUpdate(key, { title: e.target.value })}
           maxLength={80}
-          className="flex-1 text-sm font-semibold text-text-primary bg-transparent rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-accent/40"
-          style={{ border: "1px solid var(--color-border-default)" }}
+          className="flex-1 text-sm font-semibold text-text-primary rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent/40"
+          style={{ background: "var(--color-surface-overlay)", border: "1px solid var(--color-border-strong)" }}
           placeholder="Title"
         />
         <select
           value={edited.category}
           onChange={(e) => onUpdate(key, { category: e.target.value as WinCategory })}
-          className="text-xs rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-accent/40"
-          style={{ background: "var(--color-surface-raised)", color: "var(--color-text-primary)", border: "1px solid var(--color-border-default)", minWidth: "130px" }}>
+          className="text-xs rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent/40"
+          style={{ background: "var(--color-surface-raised)", color: "var(--color-text-primary)", border: "1px solid var(--color-border-strong)", minWidth: "130px" }}>
           {WIN_CATEGORIES.map((c) => (
             <option key={c} value={c}>{c}</option>
           ))}
@@ -330,8 +330,8 @@ function RecordCard({ record, onApproval, onUpdate }: RecordCardProps) {
         value={edited.impact}
         onChange={(e) => onUpdate(key, { impact: e.target.value })}
         rows={2}
-        className="w-full text-xs text-text-secondary bg-transparent rounded-lg px-2 py-1.5 resize-none focus:outline-none focus:ring-2 focus:ring-accent/40"
-        style={{ border: "1px solid var(--color-border-subtle)" }}
+        className="w-full text-xs text-text-secondary rounded-lg px-2.5 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-accent/40"
+        style={{ background: "var(--color-surface-overlay)", border: "1px solid var(--color-border-strong)" }}
         placeholder="Impact statement"
       />
 
@@ -348,8 +348,8 @@ function RecordCard({ record, onApproval, onUpdate }: RecordCardProps) {
               const raw = e.target.value.replace(/[^0-9]/g, "");
               onUpdate(key, { arr_amount: raw === "" ? null : parseInt(raw, 10) });
             }}
-            className="w-full text-xs text-text-primary bg-transparent rounded-lg pl-6 pr-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent/40"
-            style={{ border: "1px solid var(--color-border-default)" }}
+            className="w-full text-xs text-text-primary rounded-lg pl-6 pr-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent/40"
+            style={{ background: "var(--color-surface-overlay)", border: "1px solid var(--color-border-strong)" }}
             placeholder="ARR"
           />
           {edited.arr_amount !== null && (
@@ -361,8 +361,8 @@ function RecordCard({ record, onApproval, onUpdate }: RecordCardProps) {
           type="date"
           value={edited.happened_at?.slice(0, 10) ?? ""}
           onChange={(e) => onUpdate(key, { happened_at: e.target.value || null })}
-          className="text-xs text-text-secondary bg-transparent rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent/40"
-          style={{ border: "1px solid var(--color-border-default)", colorScheme: "dark", minWidth: "140px" }}
+          className="text-xs text-text-secondary rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent/40"
+          style={{ background: "var(--color-surface-overlay)", border: "1px solid var(--color-border-strong)", colorScheme: "dark", minWidth: "140px" }}
         />
       </div>
 
@@ -392,9 +392,9 @@ function RecordCard({ record, onApproval, onUpdate }: RecordCardProps) {
           onClick={() => onApproval(key, "approved")}
           className="flex-1 py-2 rounded-lg text-xs font-bold transition-all"
           style={{
-            background: approval === "approved" ? "color-mix(in srgb, var(--color-success) 20%, transparent)" : "color-mix(in srgb, var(--color-success) 6%, transparent)",
+            background: approval === "approved" ? "color-mix(in srgb, var(--color-success) 24%, transparent)" : "color-mix(in srgb, var(--color-success) 14%, transparent)",
             color: "var(--color-success)",
-            border: `1px solid ${approval === "approved" ? "color-mix(in srgb, var(--color-success) 40%, transparent)" : "color-mix(in srgb, var(--color-success) 15%, transparent)"}`,
+            border: `1px solid ${approval === "approved" ? "color-mix(in srgb, var(--color-success) 48%, transparent)" : "color-mix(in srgb, var(--color-success) 32%, transparent)"}`,
           }}>
           {approval === "approved" ? "✓ Approved" : "Approve"}
         </button>
@@ -402,9 +402,9 @@ function RecordCard({ record, onApproval, onUpdate }: RecordCardProps) {
           onClick={() => onApproval(key, "rejected")}
           className="flex-1 py-2 rounded-lg text-xs font-bold transition-all"
           style={{
-            background: approval === "rejected" ? "color-mix(in srgb, var(--color-danger) 15%, transparent)" : "color-mix(in srgb, var(--color-danger) 4%, transparent)",
+            background: approval === "rejected" ? "color-mix(in srgb, var(--color-danger) 20%, transparent)" : "color-mix(in srgb, var(--color-danger) 12%, transparent)",
             color: "var(--color-danger-soft)",
-            border: `1px solid ${approval === "rejected" ? "color-mix(in srgb, var(--color-danger) 35%, transparent)" : "color-mix(in srgb, var(--color-danger) 12%, transparent)"}`,
+            border: `1px solid ${approval === "rejected" ? "color-mix(in srgb, var(--color-danger) 42%, transparent)" : "color-mix(in srgb, var(--color-danger) 28%, transparent)"}`,
           }}>
           {approval === "rejected" ? "✕ Rejected" : "Reject"}
         </button>
