@@ -35,6 +35,8 @@ export default function WinLogger({
     setLoading(false);
   };
 
+  const submitDisabled = loading || !input.trim();
+
   return (
     <div>
       <h2 className="text-base font-bold text-text-primary mb-1">Write a win</h2>
@@ -47,13 +49,20 @@ export default function WinLogger({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={`One win:\nClosed Acme Corp at $120K ARR. Multi-threaded exec team, navigated legal + IT review.\n\nOr paste a whole list — AI will split them automatically.`}
-          rows={5}
+          rows={4}
           className="w-full px-4 py-3 rounded-xl text-sm text-text-primary placeholder-text-faint resize-none focus:outline-none focus:ring-2 focus:ring-accent/40"
           style={{ background: "var(--color-surface-overlay)", border: "1px solid var(--color-border-default)" }}
         />
-        <button type="submit" disabled={loading || !input.trim()}
-          className="px-6 py-2.5 rounded-xl text-sm font-bold transition-all hover:opacity-90 disabled:opacity-40"
-          style={{ background: "var(--color-accent)", color: "var(--color-surface-base)" }}>
+        <button
+          type="submit"
+          disabled={submitDisabled}
+          className="px-6 py-2.5 rounded-xl text-sm font-bold transition-opacity enabled:hover:opacity-90"
+          style={
+            submitDisabled
+              ? { background: "var(--color-surface-overlay)", color: "var(--color-text-faint)", cursor: "not-allowed" }
+              : { background: "var(--color-accent)", color: "var(--color-surface-base)" }
+          }
+        >
           {loading ? "Processing..." : "Log win →"}
         </button>
       </form>
