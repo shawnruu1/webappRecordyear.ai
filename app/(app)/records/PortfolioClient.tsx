@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { WinWithEditStatus, WinVersion } from "@/types";
 import { deriveVerificationTier } from "@/lib/verification";
 import { timeContext } from "@/lib/recordDisplay";
@@ -36,7 +37,20 @@ export default function PortfolioClient({
   versionsByWin,
   filtersActive = false,
 }: Props) {
+  const router = useRouter();
   const [openChangelog, setOpenChangelog] = useState<string | null>(null);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  async function handleDelete(id: string) {
+    setDeletingId(id);
+    const res = await fetch(`/api/wins/${id}`, { method: "DELETE" });
+    setDeletingId(null);
+    if (res.ok) {
+      setConfirmId(null);
+      router.refresh();
+    }
+  }
 
   if (wins.length === 0) {
     return (
@@ -90,36 +104,76 @@ export default function PortfolioClient({
                       <div className="flex items-start justify-between gap-2 mb-1">
                         <h3 className="text-sm font-semibold text-text-primary">{win.title}</h3>
 
-                        {/* Edited indicator — only shown on artifact-backed wins with version history */}
-                        {win.has_version_history && (
-                          <button
-                            onClick={() => setOpenChangelog(isOpen ? null : win.id)}
-                            title="This record has been edited — view changelog"
-                            className="flex-shrink-0 flex items-center gap-1 transition-colors"
-                            style={{ color: isOpen ? "var(--color-accent)" : "var(--color-text-faint)" }}
-                          >
-                            {/* Pencil icon */}
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
-                              <path
-                                d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              <path
-                                d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                            <span className="text-[9px] font-semibold uppercase tracking-wide">
-                              {isOpen ? "Hide" : "Edited"}
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                          {/* Edited indicator — only on wins with version history */}
+                          {win.has_version_history && (
+                            <button
+                              onClick={() => setOpenChangelog(isOpen ? null : win.id)}
+                              title="This record has been edited — view changelog"
+                              className="flex items-center gap-1 transition-colors"
+                              style={{ color: isOpen ? "var(--color-accent)" : "var(--color-text-faint)" }}
+                            >
+                              {/* Pencil icon */}
+                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
+                                <path
+                                  d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                                <path
+                                  d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                              <span className="text-[9px] font-semibold uppercase tracking-wide">
+                                {isOpen ? "Hide" : "Edited"}
+                              </span>
+                            </button>
+                          )}
+
+                          {/* Delete — two-step inline confirm; soft delete */}
+                          {confirmId === win.id ? (
+                            <span className="flex items-center gap-2 text-[9px] font-semibold uppercase tracking-wide">
+                              <button
+                                onClick={() => handleDelete(win.id)}
+                                disabled={deletingId === win.id}
+                                className="text-danger-soft hover:opacity-80 transition-opacity disabled:opacity-50"
+                              >
+                                {deletingId === win.id ? "Deleting…" : "Delete"}
+                              </button>
+                              <button
+                                onClick={() => setConfirmId(null)}
+                                className="text-text-faint hover:text-text-tertiary transition-colors"
+                              >
+                                Cancel
+                              </button>
                             </span>
-                          </button>
-                        )}
+                          ) : (
+                            <button
+                              onClick={() => setConfirmId(win.id)}
+                              title="Delete record"
+                              aria-label="Delete record"
+                              className="text-text-faint hover:text-danger-soft transition-colors"
+                            >
+                              {/* Trash icon */}
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                                <polyline points="3 6 5 6 21 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <path
+                                  d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
                       </div>
 
                       {win.impact && (

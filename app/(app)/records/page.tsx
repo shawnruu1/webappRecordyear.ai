@@ -50,7 +50,8 @@ export default async function RecordsPage({
   const { data: allCategories } = await supabase
     .from("wins")
     .select("category")
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .is("deleted_at", null);
 
   const categoryCounts = FILTER_CATEGORY_ORDER.reduce(
     (acc, c) => ({ ...acc, [c]: 0 }),
