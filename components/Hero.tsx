@@ -32,10 +32,10 @@ export default function Hero() {
             className="inline-block px-7 py-3.5 rounded-sm text-sm font-medium transition-opacity hover:opacity-90"
             style={{ background: "var(--mkt-ink)", color: "var(--mkt-bg)" }}
           >
-            Get early access →
+            Get started →
           </Link>
           <p className="text-xs" style={{ color: "var(--mkt-ink-muted)" }}>
-            Free during beta · No credit card required
+            Free · No credit card required
           </p>
         </div>
 

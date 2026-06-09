@@ -55,7 +55,7 @@ export default function Navbar() {
             className="px-4 py-2 rounded-sm text-sm font-medium transition-opacity hover:opacity-90"
             style={{ background: "var(--mkt-ink)", color: "var(--mkt-bg)" }}
           >
-            Get early access
+            Get started
           </Link>
         </div>
       </div>

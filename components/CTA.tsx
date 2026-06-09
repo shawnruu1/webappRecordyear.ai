@@ -20,10 +20,10 @@ export default function CTA() {
             className="inline-block px-7 py-3.5 rounded-sm text-sm font-medium transition-opacity hover:opacity-90"
             style={{ background: "var(--mkt-bg)", color: "var(--mkt-ink)" }}
           >
-            Get early access →
+            Get started →
           </Link>
           <p className="text-xs" style={{ color: "rgba(242,237,228,0.6)" }}>
-            Free during beta. No credit card.
+            Free. No credit card.
           </p>
         </div>
       </div>
