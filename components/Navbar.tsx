@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { playfair } from "@/lib/marketingFonts";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -22,12 +21,13 @@ export default function Navbar() {
       }}
     >
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link
-          href="/"
-          className={`${playfair.className} text-xl font-bold`}
-          style={{ color: "var(--mkt-ink)" }}
-        >
-          RecordYear
+        <Link href="/" aria-label="RecordYear home" className="flex items-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/recordyear-lockup-cream.svg"
+            alt="RecordYear"
+            style={{ height: 28, width: "auto" }}
+          />
         </Link>
 
         <div
