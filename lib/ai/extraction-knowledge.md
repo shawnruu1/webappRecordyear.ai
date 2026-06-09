@@ -4,6 +4,16 @@ This document is loaded into the AI's context for every wins extraction call. It
 
 ## Core revenue concepts
 
+> **Governing principle.** The extraction's job is not to guess perfectly — it is to never hide a guess. A flagged low-confidence value is always preferable to a confidently-wrong one, because a silently-wrong number poisons the credibility the product depends on. When source data is ambiguous, surface the ambiguity to the user in review rather than resolving it silently.
+
+**Disambiguation heuristics (apply in order):**
+
+- If one monetary value is approximately 12× another, the larger is annual (ARR) and the smaller is monthly (MRR) — use the annual figure.
+- When only a monthly figure is present, multiply by 12 and record the original monthly figure in `raw_excerpt` so the conversion is auditable.
+- A much-larger value paired with a multi-year contract term is likely TCV, not ARR — do not use it as ARR.
+- Never default to the smallest monetary value.
+- When a record has 2+ unlabeled monetary values and no clear annual label, set confidence to **low** and let the source values stand in `raw_excerpt` for the user to disambiguate. (This is also enforced in code, not left to discretion.)
+
 **ARR** (Annual Recurring Revenue) — revenue normalized to a 12-month basis. The canonical revenue field in RecordYear's data model. All other monetary values should be converted to ARR when storing in `arr_amount`.
 
 **ACV** (Annual Contract Value) — for our purposes, treated as synonymous with ARR. If a deal is a single-year recurring contract, ACV = ARR.

@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { ExtractedWinRecord, WinCategory } from "@/types";
 import { WIN_CATEGORIES } from "@/types";
 import { buildWinExtractionPrompt } from "@/lib/ai/buildExtractionPrompt";
+import { enforceArrAmbiguity } from "@/lib/ai/arrAmbiguity";
 import {
   logAICall,
   classifyAIError,
@@ -67,7 +68,7 @@ function normalizeRecord(item: Record<string, unknown>): ExtractedWinRecord {
       ? Math.round(parseFloat(String(rawArr).replace(/[^0-9.]/g, ""))) || null
       : null;
 
-  return {
+  return enforceArrAmbiguity({
     title: String(item.title).slice(0, 60),
     category,
     impact: String(item.impact),
@@ -85,7 +86,7 @@ function normalizeRecord(item: Record<string, unknown>): ExtractedWinRecord {
       item.confidence === "high" || item.confidence === "low"
         ? item.confidence
         : "medium",
-  };
+  });
 }
 
 export async function extractWinsFromPDF(

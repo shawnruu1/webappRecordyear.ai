@@ -104,7 +104,12 @@ Each object must have exactly these fields:
 - category: one of ${categoryList}
 - impact: one sentence describing the business or career impact. Use ARR not MRR.
 - tags: array of 2–5 relevant keywords (deal type, industry, partner name, etc.)
-- arr_amount: the ARR value as a plain integer with no symbols or commas (e.g. 21792 for $21,792 ARR). Apply MRR × 12 before setting this value. If there is no revenue figure, use null.
+- arr_amount: the ARR value as a plain integer with no symbols or commas (e.g. 21792 for $21,792 ARR). If there is no revenue figure, use null. Disambiguate monetary values with these rules:
+    * If one value is approximately 12× another, the larger is annual (ARR) and the smaller is monthly (MRR) — use the annual figure.
+    * If only a monthly figure is present, multiply by 12 and record the original monthly figure in raw_excerpt so the conversion is auditable.
+    * A much-larger value paired with a multi-year contract term is likely TCV, not ARR — do not use it as ARR; derive ARR from the term if possible, otherwise prefer a clearly-annual value.
+    * Never default to the smallest monetary value.
+    * If a record has multiple unlabeled monetary values and you cannot confidently identify which is ARR, set confidence to "low" rather than guessing (the system also enforces this).
 - happened_at: ISO date string (YYYY-MM-DD) if a date is visible, otherwise null.
 - raw_excerpt: the specific text or region from the source that this win was extracted from. Always include the original MRR or TCV figure here if one was present, so the conversion is auditable.
 - confidence: "high" if clearly stated, "medium" if inferred or converted, "low" if uncertain or ambiguous.

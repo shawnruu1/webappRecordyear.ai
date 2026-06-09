@@ -275,6 +275,7 @@ export interface ExtractedWinRecord {
   happened_at: string | null; // ISO date string if detectable, else null
   raw_excerpt: string; // The text/region Claude pulled this from
   confidence: "high" | "medium" | "low";
+  arr_flag?: string | null; // Set by the ARR ambiguity guard when monetary columns are ambiguous
   // Optional role-specific fields (salesperson: acv/quota; lawyer:
   // billable_hours/case_status; etc.). Populated by role-aware text
   // extraction; absent from image/PDF extractors for now.

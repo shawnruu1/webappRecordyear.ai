@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { ExtractedWinRecord, WinCategory, UserRole } from "@/types";
 import { WIN_CATEGORIES, DEFAULT_USER_ROLE } from "@/types";
 import { buildWinExtractionPrompt } from "@/lib/ai/buildExtractionPrompt";
+import { enforceArrAmbiguity } from "@/lib/ai/arrAmbiguity";
 import {
   logAICall,
   classifyAIError,
@@ -70,7 +71,7 @@ function normalizeRecord(item: Record<string, unknown>): ExtractedWinRecord {
       ? Math.round(parseFloat(String(rawArr).replace(/[^0-9.]/g, ""))) || null
       : null;
 
-  return {
+  return enforceArrAmbiguity({
     title: String(item.title).slice(0, 60),
     category,
     impact: String(item.impact),
@@ -87,7 +88,7 @@ function normalizeRecord(item: Record<string, unknown>): ExtractedWinRecord {
         ? item.confidence
         : "medium",
     role_context: normalizeRoleContext(item.role_context),
-  };
+  });
 }
 
 export async function extractWins(
