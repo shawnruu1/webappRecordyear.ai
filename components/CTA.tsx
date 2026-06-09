@@ -9,7 +9,9 @@ export default function CTA() {
           className={`${playfair.className} font-black leading-tight`}
           style={{ color: "var(--mkt-bg)", fontSize: "clamp(2.5rem, 6vw, 4.5rem)" }}
         >
-          Start building your record today.
+          You had a record year.
+          <br />
+          Where&rsquo;s the proof?
         </h2>
 
         <div className="mt-10 flex flex-col items-center gap-3">

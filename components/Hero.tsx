@@ -13,18 +13,17 @@ export default function Hero() {
             lineHeight: 1.04,
           }}
         >
-          You had a record year.
-          <br />
-          Where&rsquo;s the proof?
+          The company&rsquo;s record serves the company.
         </h1>
 
         <p
           className="mx-auto leading-relaxed"
           style={{ color: "var(--mkt-ink-muted)", fontSize: "18px", maxWidth: "540px" }}
         >
-          RecordYear captures every win — deals closed, quotas hit, recognition
-          earned — and builds a permanent, portable career record. So when the
-          moment comes, you&rsquo;re ready.
+          Your wins, your IP, your numbers live in a CRM you don&rsquo;t own. The
+          day you leave, the proof of your best work stays behind. RecordYear is
+          the permanent, portable record of your career that no employer
+          controls.
         </p>
 
         <div className="mt-10 flex flex-col items-center gap-3">
@@ -37,6 +36,17 @@ export default function Hero() {
           </Link>
           <p className="text-xs" style={{ color: "var(--mkt-ink-muted)" }}>
             Free during beta · No credit card required
+          </p>
+        </div>
+
+        <div className="mx-auto mt-12" style={{ maxWidth: "520px" }}>
+          <p className="text-sm leading-relaxed" style={{ color: "var(--mkt-ink-muted)" }}>
+            &ldquo;I closed deals at every company I worked for. When I left, I
+            couldn&rsquo;t prove a single one. RecordYear is the record I wish
+            I&rsquo;d kept.&rdquo;
+          </p>
+          <p className="mt-2 text-xs" style={{ color: "var(--mkt-ink-muted)" }}>
+            — Shawn, founder
           </p>
         </div>
       </div>
