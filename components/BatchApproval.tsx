@@ -151,7 +151,7 @@ export default function BatchApproval({ results, onSaved, onDismiss }: Props) {
       <div className="flex items-center justify-between px-6 py-4"
         style={{ borderBottom: "1px solid var(--color-border-subtle)" }}>
         <div>
-          <h2 className="text-base font-bold text-text-primary">Review extracted wins</h2>
+          <h2 className="text-base font-bold text-text-primary">Review extracted records</h2>
           <p className="text-xs text-text-tertiary mt-0.5">
             Edit any field before approving. Approved records are saved to your record.
           </p>

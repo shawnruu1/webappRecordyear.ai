@@ -39,16 +39,16 @@ export default function WinLogger({
 
   return (
     <div>
-      <h2 className="text-base font-bold text-text-primary mb-1">Write a win</h2>
+      <h2 className="text-base font-bold text-text-primary mb-1">Write a record</h2>
       <p className="text-xs text-text-tertiary mb-4">
-        Paste one win or many. AI splits and enriches each one separately.
+        Paste one record or many. AI splits and enriches each one separately.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-3">
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={`One win:\nClosed Acme Corp at $120K ARR. Multi-threaded exec team, navigated legal + IT review.\n\nOr paste a whole list — AI will split them automatically.`}
+          placeholder={`One record:\nClosed Acme Corp at $120K ARR. Multi-threaded exec team, navigated legal + IT review.\n\nOr paste a whole list — AI will split them automatically.`}
           rows={4}
           className="w-full px-4 py-3 rounded-xl text-sm text-text-primary placeholder-text-faint resize-none focus:outline-none focus:ring-2 focus:ring-accent/40"
           style={{ background: "var(--color-surface-overlay)", border: "1px solid var(--color-border-default)" }}
@@ -63,7 +63,7 @@ export default function WinLogger({
               : { background: "var(--color-accent)", color: "var(--color-surface-base)" }
           }
         >
-          {loading ? "Processing..." : "Log win →"}
+          {loading ? "Processing..." : "Log record →"}
         </button>
       </form>
 

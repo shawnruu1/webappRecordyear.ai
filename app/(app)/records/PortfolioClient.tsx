@@ -58,7 +58,7 @@ export default function PortfolioClient({
         <p className="text-text-faint">
           {filtersActive
             ? "No records match these filters."
-            : "No wins recorded yet."}
+            : "No records yet."}
         </p>
       </div>
     );

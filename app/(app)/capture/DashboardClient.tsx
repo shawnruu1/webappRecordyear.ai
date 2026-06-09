@@ -54,7 +54,7 @@ export default function DashboardClient() {
         >
           <p className="text-xs font-medium text-text-secondary">
             <span className="text-success font-semibold">✓</span>{" "}
-            {toast === 1 ? "Win logged" : `${toast} wins logged`} — view{" "}
+            {toast === 1 ? "Record logged" : `${toast} records logged`} — view{" "}
             {toast === 1 ? "it" : "them"} in{" "}
             <Link
               href="/records"
@@ -102,7 +102,7 @@ export default function DashboardClient() {
           }}
         >
           <p className="text-xs text-text-tertiary">
-            We couldn&apos;t find any wins in that file. Try a different one, or{" "}
+            We couldn&apos;t find any records in that file. Try a different one, or{" "}
             <button
               onClick={handleDismiss}
               className="text-accent hover:opacity-80 transition-opacity underline underline-offset-2"

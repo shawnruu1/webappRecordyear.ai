@@ -191,7 +191,7 @@ export default function FileUploader({ onResults }: Props) {
       <p className="text-xs font-medium text-text-secondary mb-3">
         Attach evidence{" "}
         <span className="text-text-faint font-normal">
-          — screenshot, PDF, or export. We&rsquo;ll pull the wins out.
+          — screenshot, PDF, or export. We&rsquo;ll pull the records out.
         </span>
       </p>
 
@@ -264,8 +264,8 @@ export default function FileUploader({ onResults }: Props) {
         <div className="mt-4 pt-4" style={{ borderTop: "1px solid var(--color-border-subtle)" }}>
           <p className="text-[11px] text-text-tertiary">
             {entries.filter((e) => e.status === "done" && (e.result?.records.length ?? 0) > 0).length > 0
-              ? "Review extracted wins below before saving."
-              : "No wins were found. Try a different file or log one manually above."}
+              ? "Review extracted records below before saving."
+              : "No records were found. Try a different file or log one manually above."}
           </p>
         </div>
       )}
@@ -314,11 +314,11 @@ function FileRow({ entry, onRemove, onRetry }: FileRowProps) {
               {formatSize(file.size)}
               {status === "done" && result && result.records.length > 0 && (
                 <span className="ml-2 text-success">
-                  · {result.records.length} win{result.records.length === 1 ? "" : "s"} found
+                  · {result.records.length} record{result.records.length === 1 ? "" : "s"} found
                 </span>
               )}
               {status === "done" && result && result.records.length === 0 && (
-                <span className="ml-2 text-text-tertiary">· No wins found</span>
+                <span className="ml-2 text-text-tertiary">· No records found</span>
               )}
             </p>
           </>
