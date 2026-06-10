@@ -13,17 +13,18 @@ export default function Hero() {
             lineHeight: 1.04,
           }}
         >
-          The company&rsquo;s record serves the company.
+          More than your word.
         </h1>
 
         <p
           className="mx-auto leading-relaxed"
           style={{ color: "var(--mkt-ink-muted)", fontSize: "18px", maxWidth: "540px" }}
         >
-          Your wins, your IP, your numbers live in a CRM you don&rsquo;t own. The
-          day you leave, the proof of your best work stays behind. RecordYear is
-          the permanent, portable record of your career that no employer
-          controls.
+          When the comp plan changes after you closed. When someone snakes your
+          deal at the finish line. When you&rsquo;re walked out and the CRM goes
+          dark the same day. Your wins shouldn&rsquo;t live and die inside a
+          system you don&rsquo;t own. RecordYear is the permanent, portable
+          record of your career, built yours from the start.
         </p>
 
         <div className="mt-10 flex flex-col items-center gap-3">
@@ -41,9 +42,9 @@ export default function Hero() {
 
         <div className="mx-auto mt-12" style={{ maxWidth: "520px" }}>
           <p className="text-sm leading-relaxed" style={{ color: "var(--mkt-ink-muted)" }}>
-            &ldquo;I closed deals at every company I worked for. When I left, I
-            couldn&rsquo;t prove a single one. RecordYear is the record I wish
-            I&rsquo;d kept.&rdquo;
+            &ldquo;At my last company I had no real comp plan, no leverage when I
+            left, and no record of what I&rsquo;d actually closed. RecordYear is
+            the proof I wish I&rsquo;d kept.&rdquo;
           </p>
           <p className="mt-2 text-xs" style={{ color: "var(--mkt-ink-muted)" }}>
             — Shawn, founder

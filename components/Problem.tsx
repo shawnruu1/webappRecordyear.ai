@@ -2,16 +2,24 @@ import { playfair } from "@/lib/marketingFonts";
 
 const pains = [
   {
-    label: "REVIEW TIME",
-    body: "Six months of closed deals, champion relationships, and hard-won skills — gone from memory. You scramble through old emails instead of walking in prepared.",
+    label: "YOU CLOSE THE DEAL",
+    body: "You multi-thread the org, fight through procurement, and bring it home. The number lands in a CRM with the company's name on it — not yours.",
   },
   {
-    label: "COMP & NEGOTIATION",
-    body: "Your manager remembers the Q3 miss. Not the three enterprise logos you landed. You leave money on the table every cycle because your record isn't built.",
+    label: "THE CREDIT MOVES",
+    body: "The comp plan changes after the deal is signed. Or someone attaches themselves to it at the finish line. The win was yours; the system now says otherwise.",
   },
   {
-    label: "YOUR NEXT MOVE",
-    body: "Recruiters and hiring managers want proof, not claims. Without a record of your actual work, your value is whatever you can remember to say on a call.",
+    label: "YOU LEAVE",
+    body: "You move on, or you're walked out. The decision isn't always yours, and the timing almost never is.",
+  },
+  {
+    label: "ACCESS GOES DARK",
+    body: "Same day, the logins die. CRM, email, dashboards — every system that held the evidence of your work is gone by the afternoon.",
+  },
+  {
+    label: "ALL THAT'S LEFT IS YOUR WORD",
+    body: "In the next interview you recount the biggest deals of your career from memory. No numbers, no proof — just your word against a blank page.",
   },
 ];
 
@@ -47,6 +55,14 @@ export default function Problem() {
             </div>
           ))}
         </div>
+
+        <p
+          className="mt-12 text-lg font-medium leading-relaxed"
+          style={{ color: "var(--mkt-ink)" }}
+        >
+          RecordYear doesn&rsquo;t prevent any of this. It makes sure you walk
+          away with the receipts.
+        </p>
       </div>
     </section>
   );
