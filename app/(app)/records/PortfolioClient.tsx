@@ -7,6 +7,7 @@ import { deriveVerificationTier } from "@/lib/verification";
 import { timeContext } from "@/lib/recordDisplay";
 import { categoryColor } from "@/lib/categoryColors";
 import VerificationBadge from "@/components/VerificationBadge";
+import EvidenceViewer from "@/components/EvidenceViewer";
 
 // ------------------------------------------------------------
 // Config
@@ -41,6 +42,7 @@ export default function PortfolioClient({
   const [openChangelog, setOpenChangelog] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [evidenceWinId, setEvidenceWinId] = useState<string | null>(null);
 
   async function handleDelete(id: string) {
     setDeletingId(id);
@@ -71,7 +73,10 @@ export default function PortfolioClient({
     return acc;
   }, {});
 
+  const evidenceWin = wins.find((w) => w.id === evidenceWinId);
+
   return (
+    <>
     <div className="space-y-10">
       {Object.entries(byCategory).map(([category, categoryWins]) => {
         const color = categoryColor(category);
@@ -198,9 +203,25 @@ export default function PortfolioClient({
                         </div>
                       )}
 
-                      {/* Footer — honest verification tier + time-of-entry */}
+                      {/* Footer — honest verification tier + time-of-entry.
+                          The badge becomes a button only when a source file
+                          is actually attached; otherwise it's static (no
+                          broken/clickable state). Label + tier are unchanged. */}
                       <div className="flex items-center justify-between gap-2 mt-3">
-                        <VerificationBadge tier={tier} vouched={vouched} />
+                        {win.source_file ? (
+                          <button
+                            type="button"
+                            onClick={() => setEvidenceWinId(win.id)}
+                            aria-haspopup="dialog"
+                            aria-label={`View evidence for ${win.title}`}
+                            title="View attached evidence"
+                            className="inline-flex items-center rounded-full transition-opacity hover:opacity-80 focus:outline-none focus-visible:[box-shadow:0_0_0_2px_rgba(245,158,11,0.45)]"
+                          >
+                            <VerificationBadge tier={tier} vouched={vouched} />
+                          </button>
+                        ) : (
+                          <VerificationBadge tier={tier} vouched={vouched} />
+                        )}
                         <p className="text-[10px] text-text-faint flex-shrink-0">
                           {timeContext(win)}
                         </p>
@@ -273,5 +294,12 @@ export default function PortfolioClient({
         );
       })}
     </div>
+
+    <EvidenceViewer
+      winId={evidenceWinId}
+      winTitle={evidenceWin?.title ?? undefined}
+      onClose={() => setEvidenceWinId(null)}
+    />
+    </>
   );
 }
