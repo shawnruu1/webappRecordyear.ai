@@ -494,8 +494,8 @@ function RecordCard({ record, isExiting, onApproval, onUpdate }: RecordCardProps
       ? "color-mix(in srgb, var(--color-danger) 20%, transparent)"
       : needsReview
       ? isLowConfidence
-        ? "color-mix(in srgb, var(--color-danger) 25%, transparent)"
-        : "color-mix(in srgb, var(--color-accent) 25%, transparent)"
+        ? "color-mix(in srgb, var(--color-danger) 30%, transparent)"
+        : "color-mix(in srgb, var(--color-warning) 30%, transparent)"
       : "var(--color-border-subtle)";
 
   return (
@@ -510,18 +510,30 @@ function RecordCard({ record, isExiting, onApproval, onUpdate }: RecordCardProps
           : "batchCardEnter 180ms ease-out",
       }}>
 
-      {/* Confidence flag */}
+      {/* Confidence flag — filled warning chip (danger = low, warning = medium) */}
       {needsReview && approval === "pending" && (
-        <div className="flex items-center gap-1.5"
-          style={{ color: isLowConfidence ? "var(--color-danger-soft)" : "var(--color-accent)" }}>
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+        <div
+          className="flex items-start gap-2 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold"
+          style={{
+            color: isLowConfidence ? "var(--color-danger-soft)" : "var(--color-warning)",
+            background: isLowConfidence
+              ? "color-mix(in srgb, var(--color-danger) 12%, transparent)"
+              : "color-mix(in srgb, var(--color-warning) 12%, transparent)",
+            border: `1px solid ${
+              isLowConfidence
+                ? "color-mix(in srgb, var(--color-danger) 30%, transparent)"
+                : "color-mix(in srgb, var(--color-warning) 30%, transparent)"
+            }`,
+          }}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="flex-shrink-0 mt-px">
             <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
               stroke="currentColor" strokeWidth="2" fill="currentColor" fillOpacity="0.15"/>
             <line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
             <line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
           </svg>
-          <span className="text-[10px] font-semibold uppercase tracking-wide">
-            {isLowConfidence ? "Low confidence — review before approving" : "Medium confidence"}
+          <span>
+            {isLowConfidence ? "Low confidence — review before approving" : "Medium confidence — review before approving"}
           </span>
         </div>
       )}
@@ -533,15 +545,14 @@ function RecordCard({ record, isExiting, onApproval, onUpdate }: RecordCardProps
           value={edited.title}
           onChange={(e) => onUpdate(key, { title: e.target.value })}
           maxLength={80}
-          className="flex-1 text-sm font-semibold text-text-primary rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent/40"
-          style={{ background: "var(--color-surface-overlay)", border: "1px solid var(--color-border-strong)" }}
+          className="flex-1 text-sm font-semibold text-text-primary rounded-lg px-2.5 py-1.5 border border-transparent bg-transparent transition-colors hover:bg-[var(--color-surface-overlay-subtle)] focus:outline-none focus:bg-[var(--color-surface-overlay)] focus:border-[var(--color-border-strong)] focus:ring-2 focus:ring-accent/30"
           placeholder="Title"
         />
         <select
           value={edited.category}
           onChange={(e) => onUpdate(key, { category: e.target.value as WinCategory })}
-          className="text-xs rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent/40"
-          style={{ background: "var(--color-surface-raised)", color: "var(--color-text-primary)", border: "1px solid var(--color-border-strong)", minWidth: "130px" }}>
+          className="text-xs rounded-lg px-2 py-1.5 text-text-primary border border-[var(--color-border-strong)] transition-colors focus:outline-none focus:border-[var(--color-accent)] focus:ring-2 focus:ring-accent/40"
+          style={{ background: "var(--color-surface-raised)", minWidth: "130px" }}>
           {WIN_CATEGORIES.map((c) => (
             <option key={c} value={c}>{c}</option>
           ))}
@@ -553,8 +564,7 @@ function RecordCard({ record, isExiting, onApproval, onUpdate }: RecordCardProps
         value={edited.impact}
         onChange={(e) => onUpdate(key, { impact: e.target.value })}
         rows={2}
-        className="w-full text-xs text-text-secondary rounded-lg px-2.5 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-accent/40"
-        style={{ background: "var(--color-surface-overlay)", border: "1px solid var(--color-border-strong)" }}
+        className="w-full text-xs text-text-secondary rounded-lg px-2.5 py-2 resize-none border border-transparent bg-transparent transition-colors hover:bg-[var(--color-surface-overlay-subtle)] focus:outline-none focus:bg-[var(--color-surface-overlay)] focus:border-[var(--color-border-strong)] focus:ring-2 focus:ring-accent/30"
         placeholder="Impact statement"
       />
 
@@ -571,8 +581,7 @@ function RecordCard({ record, isExiting, onApproval, onUpdate }: RecordCardProps
               const raw = e.target.value.replace(/[^0-9]/g, "");
               onUpdate(key, { arr_amount: raw === "" ? null : parseInt(raw, 10) });
             }}
-            className="w-full text-xs text-text-primary rounded-lg pl-6 pr-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent/40"
-            style={{ background: "var(--color-surface-overlay)", border: "1px solid var(--color-border-strong)" }}
+            className="w-full text-xs text-text-primary rounded-lg pl-6 pr-2 py-1.5 bg-[var(--color-surface-overlay)] border border-[var(--color-border-strong)] transition-colors focus:outline-none focus:border-[var(--color-accent)] focus:ring-2 focus:ring-accent/40"
             placeholder="ARR"
           />
           {edited.arr_amount !== null && (
@@ -584,18 +593,22 @@ function RecordCard({ record, isExiting, onApproval, onUpdate }: RecordCardProps
           type="date"
           value={edited.happened_at?.slice(0, 10) ?? ""}
           onChange={(e) => onUpdate(key, { happened_at: e.target.value || null })}
-          className="text-xs text-text-secondary rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent/40"
-          style={{ background: "var(--color-surface-overlay)", border: "1px solid var(--color-border-strong)", colorScheme: "dark", minWidth: "140px" }}
+          className="text-xs text-text-secondary rounded-lg px-2 py-1.5 bg-[var(--color-surface-overlay)] border border-[var(--color-border-strong)] transition-colors focus:outline-none focus:border-[var(--color-accent)] focus:ring-2 focus:ring-accent/40"
+          style={{ colorScheme: "dark", minWidth: "140px" }}
         />
       </div>
 
       {/* ARR ambiguity flag — source had multiple unlabeled monetary columns */}
       {extracted.arr_flag && (
         <p
-          className="flex items-center gap-1.5 text-[10px] font-semibold"
-          style={{ color: "var(--color-danger-soft)" }}
+          className="flex items-start gap-2 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold"
+          style={{
+            color: "var(--color-danger-soft)",
+            background: "color-mix(in srgb, var(--color-danger) 12%, transparent)",
+            border: "1px solid color-mix(in srgb, var(--color-danger) 30%, transparent)",
+          }}
         >
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" className="flex-shrink-0">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="flex-shrink-0 mt-px">
             <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke="currentColor" strokeWidth="2" fill="currentColor" fillOpacity="0.15" />
             <line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             <line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -607,10 +620,14 @@ function RecordCard({ record, isExiting, onApproval, onUpdate }: RecordCardProps
       {/* Ownership flag — row appears to belong to someone other than the user */}
       {extracted.owner_flag && (
         <p
-          className="flex items-center gap-1.5 text-[10px] font-semibold"
-          style={{ color: "var(--color-danger-soft)" }}
+          className="flex items-start gap-2 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold"
+          style={{
+            color: "var(--color-danger-soft)",
+            background: "color-mix(in srgb, var(--color-danger) 12%, transparent)",
+            border: "1px solid color-mix(in srgb, var(--color-danger) 30%, transparent)",
+          }}
         >
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" className="flex-shrink-0">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="flex-shrink-0 mt-px">
             <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke="currentColor" strokeWidth="2" fill="currentColor" fillOpacity="0.15" />
             <line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             <line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -622,10 +639,14 @@ function RecordCard({ record, isExiting, onApproval, onUpdate }: RecordCardProps
       {/* Deal-status flag — not clearly closed-won */}
       {extracted.status_flag && (
         <p
-          className="flex items-center gap-1.5 text-[10px] font-semibold"
-          style={{ color: "var(--color-danger-soft)" }}
+          className="flex items-start gap-2 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold"
+          style={{
+            color: "var(--color-danger-soft)",
+            background: "color-mix(in srgb, var(--color-danger) 12%, transparent)",
+            border: "1px solid color-mix(in srgb, var(--color-danger) 30%, transparent)",
+          }}
         >
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" className="flex-shrink-0">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="flex-shrink-0 mt-px">
             <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke="currentColor" strokeWidth="2" fill="currentColor" fillOpacity="0.15" />
             <line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             <line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -704,7 +725,7 @@ function TagEditor({ tags, onChange }: TagEditorProps) {
   }
 
   return (
-    <div className="flex flex-wrap gap-1.5 items-center">
+    <div className="flex flex-wrap gap-1.5 items-center rounded-lg px-2 py-1.5 bg-[var(--color-surface-overlay)] border border-[var(--color-border-strong)] transition-colors focus-within:border-[var(--color-accent)] focus-within:ring-2 focus-within:ring-accent/40">
       {tags.map((tag) => (
         <span key={tag}
           className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full"
