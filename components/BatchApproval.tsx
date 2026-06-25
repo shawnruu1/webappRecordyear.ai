@@ -90,6 +90,10 @@ export default function BatchApproval({ results, onSaved, onDismiss }: Props) {
   const pending = records.filter((r) => r.approval === "pending");
   const grouped = groupByFile(records);
 
+  // Single source of truth for the save button label — shared by the footer
+  // button and the sticky bar so they never drift.
+  const saveLabel = saving ? "Saving…" : `Save ${approved.length} approved →`;
+
   // ---- Mutators ----
   const setApproval = useCallback(
     (key: string, state: "approved" | "rejected") => {
@@ -144,6 +148,34 @@ export default function BatchApproval({ results, onSaved, onDismiss }: Props) {
   if (records.length === 0) return null;
 
   return (
+    <>
+    {/* Sticky save bar — keeps the save path on screen while reviewing so
+        users never miss it below the fold. Mounted OUTSIDE the rounded card
+        on purpose: the card's overflow-hidden would break position: sticky.
+        Reuses handleSave + saveLabel; appears only once something is approved. */}
+    {approved.length > 0 && (
+      <div
+        className="sticky top-0 z-20 flex items-center justify-between gap-4 rounded-xl px-6 py-3"
+        style={{
+          background: "var(--color-surface-raised)",
+          border: "1px solid color-mix(in srgb, var(--color-accent) 30%, transparent)",
+          boxShadow: "0 8px 24px rgba(0, 0, 0, 0.35)",
+        }}
+      >
+        <p className="text-xs text-text-secondary">
+          <span className="text-success font-semibold">{approved.length} approved</span>
+          <span className="text-text-faint"> · ready to save</span>
+        </p>
+        <button
+          onClick={handleSave}
+          disabled={saving || approved.length === 0}
+          className="px-5 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-90 disabled:opacity-40"
+          style={{ background: "var(--color-accent)", color: "var(--color-surface-base)" }}>
+          {saveLabel}
+        </button>
+      </div>
+    )}
+
     <div className="rounded-2xl overflow-hidden"
       style={{ border: "1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)", background: "var(--gradient-surface-card)" }}>
 
@@ -205,11 +237,12 @@ export default function BatchApproval({ results, onSaved, onDismiss }: Props) {
             disabled={saving || approved.length === 0}
             className="px-5 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-90 disabled:opacity-40"
             style={{ background: "var(--color-accent)", color: "var(--color-surface-base)" }}>
-            {saving ? "Saving…" : `Save ${approved.length} approved →`}
+            {saveLabel}
           </button>
         </div>
       </div>
     </div>
+    </>
   );
 }
 
