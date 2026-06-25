@@ -11,6 +11,15 @@ export default async function CapturePage() {
 
   if (!user) redirect("/login");
 
+  // First-run nudge — keyed off zero records (no extra flag). Naturally
+  // disappears once the user has saved their first record.
+  const { count } = await supabase
+    .from("wins")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .is("deleted_at", null);
+  const isFirstCapture = (count ?? 0) === 0;
+
   return (
     <div className="w-full max-w-[860px] mx-auto px-6 mt-12">
       <div className="mb-8">
@@ -23,7 +32,7 @@ export default async function CapturePage() {
         </p>
       </div>
       {/* Logged wins live on /records. */}
-      <DashboardClient />
+      <DashboardClient firstCapture={isFirstCapture} />
     </div>
   );
 }

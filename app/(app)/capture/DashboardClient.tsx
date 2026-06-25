@@ -7,9 +7,14 @@ import FileUploader from "@/components/FileUploader";
 import BatchApproval from "@/components/BatchApproval";
 import type { FileExtractionResult } from "@/types";
 
-export default function DashboardClient() {
+export default function DashboardClient({
+  firstCapture = false,
+}: {
+  firstCapture?: boolean;
+}) {
   const [results, setResults] = useState<FileExtractionResult[]>([]);
   const [toast, setToast] = useState<number | null>(null);
+  const [promptDismissed, setPromptDismissed] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Slim success toast, auto-dismissing after 4s. Shared by both success
@@ -43,6 +48,30 @@ export default function DashboardClient() {
 
   return (
     <div className="space-y-6">
+      {/* First-run welcome — shown until the user has their first record */}
+      {firstCapture && !promptDismissed && (
+        <div
+          className="flex items-center justify-between gap-3 rounded-xl px-4 py-3"
+          style={{
+            background: "color-mix(in srgb, var(--color-accent) 8%, transparent)",
+            border: "1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)",
+          }}
+        >
+          <p className="text-xs text-text-secondary">
+            <span className="font-semibold text-text-primary">Welcome.</span>{" "}
+            Capture your first record to get started.
+          </p>
+          <button
+            type="button"
+            onClick={() => setPromptDismissed(true)}
+            aria-label="Dismiss"
+            className="text-text-faint hover:text-text-tertiary transition-colors leading-none"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Success toast — links to the records page, where wins now live */}
       {toast !== null && (
         <div

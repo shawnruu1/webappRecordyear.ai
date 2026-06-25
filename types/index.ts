@@ -192,6 +192,11 @@ export interface Profile {
   username: string | null; // URL slug, unique, case-insensitive
   display_name: string | null; // human-facing name on the public page
   public_profile_enabled: boolean; // does /[username] resolve at all
+  // First-run onboarding (added in migration 20260625_onboarding_fields)
+  company: string | null;
+  job_title: string | null;
+  start_date: string | null; // ISO date (YYYY-MM-DD)
+  onboarding_completed_at: string | null; // null = setup not finished → gate to /setup
   created_at: string;
   updated_at: string;
 }

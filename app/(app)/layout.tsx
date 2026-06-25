@@ -17,6 +17,19 @@ export default async function AppLayout({
 
   if (!user) redirect("/login");
 
+  // Onboarding gate — a first-run user (no profile row, or setup not finished)
+  // is sent to /setup once. /setup lives OUTSIDE this (app) group, so this
+  // redirect can't loop back through here.
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("onboarding_completed_at")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (!profile || !profile.onboarding_completed_at) {
+    redirect("/setup");
+  }
+
   return (
     <div className="min-h-screen bg-surface-base">
       <AppSidebar />

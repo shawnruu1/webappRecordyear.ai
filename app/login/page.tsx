@@ -3,8 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { ROLE_OPTIONS, DEFAULT_USER_ROLE } from "@/types";
-import type { UserRole } from "@/types";
 import Link from "next/link";
 import { playfair, dmSans } from "@/lib/marketingFonts";
 
@@ -18,7 +16,6 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
-  const [role, setRole] = useState<UserRole>(DEFAULT_USER_ROLE);
   const [step, setStep] = useState<"email" | "code">("email");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -44,7 +41,7 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
     const supabase = createClient();
-    const { data, error } = await supabase.auth.verifyOtp({
+    const { error } = await supabase.auth.verifyOtp({
       email,
       token: code.trim(),
       type: "email",
@@ -56,17 +53,8 @@ export default function LoginPage() {
       return;
     }
 
-    // Capture role once at signup. ignoreDuplicates leaves an existing
-    // profile (returning user) untouched — only first sign-in writes it.
-    if (data.user) {
-      await supabase
-        .from("profiles")
-        .upsert(
-          { id: data.user.id, role },
-          { onConflict: "id", ignoreDuplicates: true }
-        );
-    }
-
+    // Profile creation + role/details now happen in first-run /setup, reached
+    // via the onboarding gate in (app)/layout.tsx — not here.
     setLoading(false);
     router.push("/dashboard");
   };
@@ -109,28 +97,6 @@ export default function LoginPage() {
                   className={`${FIELD_CLASS} placeholder-[#A39C94]`}
                   style={FIELD_STYLE}
                 />
-                <div>
-                  <label
-                    htmlFor="role"
-                    className="block text-xs mb-1.5"
-                    style={{ color: "#6B6560" }}
-                  >
-                    What best describes your work?
-                  </label>
-                  <select
-                    id="role"
-                    value={role}
-                    onChange={(e) => setRole(e.target.value as UserRole)}
-                    className={`${FIELD_CLASS} appearance-none`}
-                    style={FIELD_STYLE}
-                  >
-                    {ROLE_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
                 {error && (
                   <p className="text-sm" style={{ color: "#B42318" }}>
                     {error}
