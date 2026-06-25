@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { ExtractedWinRecord } from "@/types";
+import type { ExtractedWinRecord, UserRole } from "@/types";
 import { buildWinExtractionPrompt } from "@/lib/ai/buildExtractionPrompt";
 import { parseExtractionResponse } from "@/lib/ai/parseExtractionResponse";
 import {
@@ -73,7 +73,11 @@ export async function extractWinsFromImage(
               },
               {
                 type: "text",
-                text: buildWinExtractionPrompt({ sourceType: "image" }),
+                text: buildWinExtractionPrompt({
+                  sourceType: "image",
+                  userRole: (ctx?.userRole ?? undefined) as UserRole | undefined,
+                  userName: ctx?.userName ?? undefined,
+                }),
               },
             ],
           },

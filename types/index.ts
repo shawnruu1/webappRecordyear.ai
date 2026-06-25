@@ -276,6 +276,8 @@ export interface ExtractedWinRecord {
   raw_excerpt: string; // The text/region Claude pulled this from
   confidence: "high" | "medium" | "low";
   arr_flag?: string | null; // Set by the ARR ambiguity guard when monetary columns are ambiguous
+  owner_flag?: string | null; // Set when a row appears to belong to someone other than the user; forces low confidence
+  status_flag?: string | null; // Set when a deal is not clearly closed-won; forces low confidence
   // Optional role-specific fields (salesperson: acv/quota; lawyer:
   // billable_hours/case_status; etc.). Populated by role-aware text
   // extraction; absent from image/PDF extractors for now.

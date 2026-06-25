@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { ExtractedWinRecord } from "@/types";
+import type { ExtractedWinRecord, UserRole } from "@/types";
 import { buildWinExtractionPrompt } from "@/lib/ai/buildExtractionPrompt";
 import { parseExtractionResponse } from "@/lib/ai/parseExtractionResponse";
 import {
@@ -65,7 +65,11 @@ export async function extractWinsFromPDF(
       },
       {
         type: "text",
-        text: buildWinExtractionPrompt({ sourceType: "pdf" }),
+        text: buildWinExtractionPrompt({
+          sourceType: "pdf",
+          userRole: (ctx?.userRole ?? undefined) as UserRole | undefined,
+          userName: ctx?.userName ?? undefined,
+        }),
       },
     ];
 

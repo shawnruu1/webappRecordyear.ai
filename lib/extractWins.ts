@@ -2,7 +2,10 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { ExtractedWinRecord, WinCategory, UserRole } from "@/types";
 import { WIN_CATEGORIES, DEFAULT_USER_ROLE } from "@/types";
 import { buildWinExtractionPrompt } from "@/lib/ai/buildExtractionPrompt";
-import { enforceArrAmbiguity } from "@/lib/ai/arrAmbiguity";
+import {
+  enforceArrAmbiguity,
+  enforceFlaggedConfidence,
+} from "@/lib/ai/arrAmbiguity";
 import {
   logAICall,
   classifyAIError,
@@ -71,7 +74,10 @@ function normalizeRecord(item: Record<string, unknown>): ExtractedWinRecord {
       ? Math.round(parseFloat(String(rawArr).replace(/[^0-9.]/g, ""))) || null
       : null;
 
-  return enforceArrAmbiguity({
+  const flag = (v: unknown): string | null =>
+    typeof v === "string" && v.trim() ? v : null;
+
+  const withArr = enforceArrAmbiguity({
     title: String(item.title).slice(0, 60),
     category,
     impact: String(item.impact),
@@ -87,8 +93,11 @@ function normalizeRecord(item: Record<string, unknown>): ExtractedWinRecord {
       item.confidence === "high" || item.confidence === "low"
         ? item.confidence
         : "medium",
+    owner_flag: flag(item.owner_flag),
+    status_flag: flag(item.status_flag),
     role_context: normalizeRoleContext(item.role_context),
   });
+  return enforceFlaggedConfidence(withArr);
 }
 
 export async function extractWins(
@@ -101,7 +110,11 @@ export async function extractWins(
   let usage: Anthropic.Usage | null = null;
 
   try {
-    const prompt = buildWinExtractionPrompt({ sourceType: "text", userRole });
+    const prompt = buildWinExtractionPrompt({
+      sourceType: "text",
+      userRole,
+      userName: ctx?.userName ?? undefined,
+    });
 
     const message = await anthropic.messages.create({
       model: MODEL,

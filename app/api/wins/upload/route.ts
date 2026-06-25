@@ -110,10 +110,10 @@ export async function POST(request: Request) {
     );
   }
 
-  // ---- Look up role for logging context (best-effort) ----
+  // ---- Look up role + name for extraction context (best-effort) ----
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, display_name")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -123,6 +123,7 @@ export async function POST(request: Request) {
     result = await extractWinsFromFile(buffer, fileEntry.type, fileEntry.name, {
       userId: user.id,
       userRole: profile?.role ?? null,
+      userName: profile?.display_name ?? null,
     });
   } catch (err) {
     // Extraction threw — clean up the uploaded file, don't leave it orphaned.

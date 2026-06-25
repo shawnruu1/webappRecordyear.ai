@@ -20,7 +20,16 @@
 
 import type { ExtractedWinRecord, WinCategory } from "@/types";
 import { WIN_CATEGORIES } from "@/types";
-import { enforceArrAmbiguity } from "@/lib/ai/arrAmbiguity";
+import {
+  enforceArrAmbiguity,
+  enforceFlaggedConfidence,
+} from "@/lib/ai/arrAmbiguity";
+
+// The model sets these semantic flags (owner mismatch / non-closed-won status).
+// Read them as trimmed strings, else null.
+function readFlag(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value : null;
+}
 
 // Thrown only when the model output cannot be parsed AND nothing can be
 // salvaged. Recoverable by design — the caller degrades to manual entry.
@@ -54,7 +63,7 @@ export function normalizeRecord(item: Record<string, unknown>): ExtractedWinReco
       ? Math.round(parseFloat(String(rawArr).replace(/[^0-9.]/g, ""))) || null
       : null;
 
-  return enforceArrAmbiguity({
+  const withArr = enforceArrAmbiguity({
     title: String(item.title).slice(0, 60),
     category,
     impact: String(item.impact),
@@ -72,7 +81,11 @@ export function normalizeRecord(item: Record<string, unknown>): ExtractedWinReco
       item.confidence === "high" || item.confidence === "low"
         ? item.confidence
         : "medium",
+    owner_flag: readFlag(item.owner_flag),
+    status_flag: readFlag(item.status_flag),
   });
+  // Force low confidence when the model flagged owner/status (mirrors ARR).
+  return enforceFlaggedConfidence(withArr);
 }
 
 function toRecords(parsed: unknown): ExtractedWinRecord[] {

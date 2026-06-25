@@ -27,6 +27,7 @@ export type AIErrorClass =
 export interface AICallContext {
   userId?: string | null;
   userRole?: string | null;
+  userName?: string | null;
 }
 
 export interface AICallLog {

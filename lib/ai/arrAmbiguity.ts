@@ -68,3 +68,17 @@ export function enforceArrAmbiguity(
   if (!isArrAmbiguous(record.raw_excerpt)) return record;
   return { ...record, confidence: "low", arr_flag: ARR_AMBIGUITY_FLAG };
 }
+
+// Companion guard for the semantic flags the MODEL sets — owner mismatch
+// (a row that appears to belong to someone else) and non-closed-won status.
+// Mirrors enforceArrAmbiguity: when either flag is present, force the record
+// to low confidence so it always lands in review. Applied in every
+// normalizeRecord, right after enforceArrAmbiguity.
+export function enforceFlaggedConfidence(
+  record: ExtractedWinRecord
+): ExtractedWinRecord {
+  if (record.owner_flag || record.status_flag) {
+    return { ...record, confidence: "low" };
+  }
+  return record;
+}

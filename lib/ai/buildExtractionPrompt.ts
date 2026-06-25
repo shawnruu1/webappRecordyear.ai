@@ -72,12 +72,21 @@ const ROLE_GUIDANCE: Record<UserRole, { noun: string; fields: string }> = {
 export function buildWinExtractionPrompt(opts: {
   sourceType: ExtractionSourceType;
   userRole?: UserRole;
+  userName?: string | null;
 }): string {
   const categoryList = WIN_CATEGORIES.map((c) => `"${c}"`).join(", ");
   const role = ROLE_GUIDANCE[opts.userRole ?? DEFAULT_USER_ROLE]
     ? (opts.userRole ?? DEFAULT_USER_ROLE)
     : DEFAULT_USER_ROLE;
   const guidance = ROLE_GUIDANCE[role];
+
+  // Identity for attribution. When we don't have a name, fall back to a
+  // generic reference — the ownership rule still applies, just without a
+  // name to match against.
+  const name = opts.userName?.trim() || null;
+  const ownerSubject = name ? `the logged-in user, ${name}` : "the logged-in user";
+  const ownerMismatch = name ? ` (an owner name other than ${name})` : "";
+  const ownerExample = name ? "Jane Smith" : "another person";
 
   return `You are a career record assistant for a ${guidance.noun}. ${SOURCE_INTRO[opts.sourceType]}
 
@@ -91,14 +100,33 @@ ${KNOWLEDGE}
 
 This user is a ${guidance.noun}. In addition to the standard fields, capture any of the following role-specific details that appear in the source and place them inside the "role_context" object: ${guidance.fields}.
 
-Only include keys you actually find evidence for — omit anything not present rather than guessing. Do NOT let role_context change the "category" field: the visible category must still be one of the standard categories below. role_context is background metadata only.
+Only include keys you actually find evidence for — omit anything not present rather than guessing. Do NOT let role_context change the "category" field — with ONE exception: a deal's stage/status governs whether it qualifies as a closed-won "Deal Closed" (see "Deal status" below). Otherwise the visible category must still be one of the standard categories below; role_context is background metadata only.
+
+## Whose records these are
+
+These records belong to ${ownerSubject}. Extract only achievements that belong to this user — not coworkers' or other reps'.
+
+CRM exports, pipeline boards, and leaderboards routinely list many people's deals, usually with an owner column ("Owner", "Account Owner", "Assigned To", "Rep", "Sales Rep"). When a row is owned by someone else${ownerMismatch}, do NOT attribute it to the user:
+- set "owner_flag" to a short note naming the apparent owner (e.g. "row owner: ${ownerExample} — may not be yours"), and
+- set "confidence" to "low".
+
+When ownership is unclear, flag it rather than assuming it is the user's. Never silently claim a row that names someone else.
+
+## Deal status — only closed-won is a closed deal
+
+Read each row's stage/status and map the category honestly. A record is the "Deal Closed" category ONLY if it is clearly closed-won (e.g. "Closed Won", "Won", "Signed", "Closed", "Completed"). Deals that are open, in progress, nurture, prospecting, negotiation, proposal, pipeline, on hold, lost, "Closed Lost", or abandoned are NOT closed deals — never label them "Deal Closed."
+
+If a row is not clearly closed-won:
+- choose the most truthful category instead of "Deal Closed",
+- set "status_flag" to a short note describing the actual stage (e.g. "stage: Nurture — not closed-won"), and
+- set "confidence" to "low".
 
 ## Output format
 
 Return a JSON array — one object per win. If no wins are found, return an empty array [].
 No markdown, no code fences, no explanation — only the JSON array.
 
-Each object must have exactly these fields:
+Each object must have these fields (use null where indicated):
 
 - title: concise title, max 60 characters. Use ARR not MRR. Never include "MRR" in the title.
 - category: one of ${categoryList}
@@ -113,5 +141,7 @@ Each object must have exactly these fields:
 - happened_at: ISO date string (YYYY-MM-DD) if a date is visible, otherwise null.
 - raw_excerpt: the specific text or region from the source that this win was extracted from. Always include the original MRR or TCV figure here if one was present, so the conversion is auditable.
 - confidence: "high" if clearly stated, "medium" if inferred or converted, "low" if uncertain or ambiguous.
+- owner_flag: usually null. If the record appears to belong to someone other than ${ownerSubject} (e.g. a different owner/rep name on the row), a short note like "row owner: ${ownerExample} — may not be yours". Null when it clearly belongs to the user.
+- status_flag: usually null. If the deal is not clearly closed-won, a short note describing the actual stage like "stage: Nurture — not closed-won". Null when clearly closed-won or when the record is not a deal.
 - role_context: an object holding the role-specific fields described above (${guidance.fields}). Include only keys you found evidence for. If none apply, use null.`;
 }

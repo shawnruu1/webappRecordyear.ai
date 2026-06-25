@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     // Falls back to the default if no profile row exists yet.
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, display_name")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -32,6 +32,7 @@ export async function POST(request: Request) {
     const enriched = await extractWins(raw_input, userRole, {
       userId: user.id,
       userRole,
+      userName: profile?.display_name ?? null,
     });
 
     const rows = enriched.map((w) => ({
