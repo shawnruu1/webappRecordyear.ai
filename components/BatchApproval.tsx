@@ -58,6 +58,11 @@ function resultsToBatchRecords(results: FileExtractionResult[]): BatchRecord[] {
   });
 }
 
+// Duration of the card leave animation. Kept in sync with the
+// `batchCardExit` keyframe below — a decided card stays mounted for this long
+// so the animation can play, then drops out of the awaiting list.
+const EXIT_MS = 220;
+
 // ------------------------------------------------------------
 // Main component
 // ------------------------------------------------------------
@@ -84,15 +89,51 @@ export default function BatchApproval({ results, onSaved, onDismiss }: Props) {
     });
   }, [results]);
 
+  // View-only state for the decide-and-clear interaction. `exiting` holds keys
+  // of just-decided cards still playing their leave animation; they stay
+  // rendered until it finishes, then drop out of the awaiting list. None of
+  // this touches a record's approval value or the save payload.
+  const [exiting, setExiting] = useState<Set<string>>(new Set());
+  const [approvedExpanded, setApprovedExpanded] = useState(false);
+  const [rejectedExpanded, setRejectedExpanded] = useState(false);
+
   // ---- Derived counts ----
   const approved = records.filter((r) => r.approval === "approved");
   const rejected = records.filter((r) => r.approval === "rejected");
   const pending = records.filter((r) => r.approval === "pending");
-  const grouped = groupByFile(records);
+
+  // The main list shows only records awaiting a decision (plus any mid-exit).
+  const awaiting = records.filter(
+    (r) => r.approval === "pending" || exiting.has(r.key)
+  );
+  const grouped = groupByFile(awaiting);
+
+  // Per-file progress from the FULL set, so group headers still read N/total.
+  const fileStats = new Map<string, { approved: number; total: number }>();
+  for (const r of records) {
+    const s = fileStats.get(r.sourceFileName) ?? { approved: 0, total: 0 };
+    s.total += 1;
+    if (r.approval === "approved") s.approved += 1;
+    fileStats.set(r.sourceFileName, s);
+  }
 
   // Single source of truth for the save button label — shared by the footer
-  // button and the sticky bar so they never drift.
+  // button, the sticky bar, and the empty state so they never drift.
   const saveLabel = saving ? "Saving…" : `Save ${approved.length} approved →`;
+
+  // ---- Exit choreography (purely visual) ----
+  // Mark a card as leaving, then remove it from the awaiting list once the
+  // animation has played. The approval value is set separately by the caller.
+  const beginExit = useCallback((key: string) => {
+    setExiting((prev) => new Set(prev).add(key));
+    setTimeout(() => {
+      setExiting((prev) => {
+        const next = new Set(prev);
+        next.delete(key);
+        return next;
+      });
+    }, EXIT_MS);
+  }, []);
 
   // ---- Mutators ----
   const setApproval = useCallback(
@@ -100,9 +141,22 @@ export default function BatchApproval({ results, onSaved, onDismiss }: Props) {
       setRecords((prev) =>
         prev.map((r) => (r.key === key ? { ...r, approval: state } : r))
       );
+      beginExit(key);
     },
-    []
+    [beginExit]
   );
+
+  // Undo a decision — return the record to the awaiting list as pending.
+  const undoDecision = useCallback((key: string) => {
+    setRecords((prev) =>
+      prev.map((r) => (r.key === key ? { ...r, approval: "pending" } : r))
+    );
+    setExiting((prev) => {
+      const next = new Set(prev);
+      next.delete(key);
+      return next;
+    });
+  }, []);
 
   const updateField = useCallback(
     (key: string, patch: Partial<ExtractedWinRecord>) => {
@@ -115,11 +169,17 @@ export default function BatchApproval({ results, onSaved, onDismiss }: Props) {
     []
   );
 
-  const approveAll = () =>
+  const approveAll = () => {
+    const keys = awaiting.map((r) => r.key);
     setRecords((prev) => prev.map((r) => ({ ...r, approval: "approved" })));
+    keys.forEach(beginExit);
+  };
 
-  const rejectAll = () =>
+  const rejectAll = () => {
+    const keys = awaiting.map((r) => r.key);
     setRecords((prev) => prev.map((r) => ({ ...r, approval: "rejected" })));
+    keys.forEach(beginExit);
+  };
 
   // ---- Save ----
   async function handleSave() {
@@ -149,30 +209,72 @@ export default function BatchApproval({ results, onSaved, onDismiss }: Props) {
 
   return (
     <>
+    {/* Card enter/leave motion — no animation library in this repo, so a small
+        inline keyframe (same approach as the spinners elsewhere). */}
+    <style>{`
+      @keyframes batchCardEnter {
+        from { opacity: 0; transform: translateY(-4px); }
+        to   { opacity: 1; transform: none; }
+      }
+      @keyframes batchCardExit {
+        from { opacity: 1; max-height: 560px; }
+        to   { opacity: 0; max-height: 0; transform: translateX(10px);
+               margin-top: 0; padding-top: 0; padding-bottom: 0; }
+      }
+    `}</style>
+
     {/* Sticky save bar — keeps the save path on screen while reviewing so
         users never miss it below the fold. Mounted OUTSIDE the rounded card
         on purpose: the card's overflow-hidden would break position: sticky.
-        Reuses handleSave + saveLabel; appears only once something is approved. */}
+        Clicking the count expands a capped, scrollable list of approved
+        records (each with Undo). Reuses handleSave + saveLabel; shown only
+        once something is approved. */}
     {approved.length > 0 && (
       <div
-        className="sticky top-0 z-20 flex items-center justify-between gap-4 rounded-xl px-6 py-3"
+        className="sticky top-0 z-20 rounded-xl overflow-hidden"
         style={{
           background: "var(--color-surface-raised)",
           border: "1px solid color-mix(in srgb, var(--color-accent) 30%, transparent)",
           boxShadow: "0 8px 24px rgba(0, 0, 0, 0.35)",
         }}
       >
-        <p className="text-xs text-text-secondary">
-          <span className="text-success font-semibold">{approved.length} approved</span>
-          <span className="text-text-faint"> · ready to save</span>
-        </p>
-        <button
-          onClick={handleSave}
-          disabled={saving || approved.length === 0}
-          className="px-5 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-90 disabled:opacity-40"
-          style={{ background: "var(--color-accent)", color: "var(--color-surface-base)" }}>
-          {saveLabel}
-        </button>
+        <div className="flex items-center justify-between gap-4 px-6 py-3">
+          <button
+            type="button"
+            onClick={() => setApprovedExpanded((v) => !v)}
+            aria-expanded={approvedExpanded}
+            className="flex items-center gap-1.5 text-xs transition-opacity hover:opacity-80"
+          >
+            <svg
+              width="10" height="10" viewBox="0 0 24 24" fill="none"
+              style={{ transform: approvedExpanded ? "rotate(90deg)" : "none", transition: "transform 0.15s" }}
+            >
+              <polyline points="9 18 15 12 9 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span className="text-success font-semibold">{approved.length} approved</span>
+            <span className="text-text-faint">· {approvedExpanded ? "hide" : "review"}</span>
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving || approved.length === 0}
+            className="px-5 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-90 disabled:opacity-40"
+            style={{ background: "var(--color-accent)", color: "var(--color-surface-base)" }}>
+            {saveLabel}
+          </button>
+        </div>
+
+        {approvedExpanded && (
+          <div
+            className="px-3 pb-3 overflow-y-auto"
+            style={{ maxHeight: "14rem", borderTop: "1px solid var(--color-border-subtle)" }}
+          >
+            <ul className="space-y-1 pt-2">
+              {approved.map((r) => (
+                <DecidedRow key={r.key} record={r} onUndo={undoDecision} />
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     )}
 
@@ -202,18 +304,88 @@ export default function BatchApproval({ results, onSaved, onDismiss }: Props) {
         </div>
       </div>
 
-      {/* Record groups */}
-      <div className="divide-y" style={{ borderColor: "var(--color-surface-overlay-strong)" }}>
-        {Array.from(grouped.entries()).map(([fileName, fileRecords]) => (
-          <FileGroup
-            key={fileName}
-            fileName={fileName}
-            records={fileRecords}
-            onApproval={setApproval}
-            onUpdate={updateField}
-          />
-        ))}
-      </div>
+      {/* Awaiting-decision list — records animate out as they're decided.
+          Only files that still have undecided records appear. */}
+      {awaiting.length > 0 ? (
+        <div className="divide-y" style={{ borderColor: "var(--color-surface-overlay-strong)" }}>
+          {Array.from(grouped.entries()).map(([fileName, fileRecords]) => {
+            const stats = fileStats.get(fileName) ?? { approved: 0, total: 0 };
+            return (
+              <FileGroup
+                key={fileName}
+                fileName={fileName}
+                records={fileRecords}
+                approvedCount={stats.approved}
+                totalCount={stats.total}
+                exiting={exiting}
+                onApproval={setApproval}
+                onUpdate={updateField}
+              />
+            );
+          })}
+        </div>
+      ) : (
+        /* Empty state — everything has been reviewed. Save is made prominent. */
+        <div className="px-6 py-14 flex flex-col items-center text-center gap-4">
+          <div
+            className="w-10 h-10 rounded-full flex items-center justify-center"
+            style={{
+              background: "color-mix(in srgb, var(--color-success) 14%, transparent)",
+              border: "1px solid color-mix(in srgb, var(--color-success) 28%, transparent)",
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ color: "var(--color-success)" }}>
+              <polyline points="20 6 9 17 4 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-text-primary">All records reviewed</p>
+            <p className="text-xs text-text-tertiary mt-0.5">
+              {approved.length} approved
+              {rejected.length > 0 ? ` · ${rejected.length} rejected` : ""}
+            </p>
+          </div>
+          <button
+            onClick={handleSave}
+            disabled={saving || approved.length === 0}
+            className="px-6 py-2.5 rounded-xl text-sm font-bold transition-all hover:opacity-90 disabled:opacity-40"
+            style={{ background: "var(--color-accent)", color: "var(--color-surface-base)" }}>
+            {saveLabel}
+          </button>
+          {approved.length === 0 && (
+            <p className="text-[11px] text-text-faint">
+              Nothing approved yet — undo a rejection below to add records.
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Rejected affordance — lightweight, so rejections aren't lost. */}
+      {rejected.length > 0 && (
+        <div className="px-6 py-3" style={{ borderTop: "1px solid var(--color-border-subtle)" }}>
+          <button
+            type="button"
+            onClick={() => setRejectedExpanded((v) => !v)}
+            aria-expanded={rejectedExpanded}
+            className="flex items-center gap-1.5 text-[11px] text-text-tertiary hover:text-text-secondary transition-colors"
+          >
+            <svg
+              width="9" height="9" viewBox="0 0 24 24" fill="none"
+              style={{ transform: rejectedExpanded ? "rotate(90deg)" : "none", transition: "transform 0.15s" }}
+            >
+              <polyline points="9 18 15 12 9 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            {rejectedExpanded ? "Hide" : "Show"} rejected ({rejected.length})
+          </button>
+          {rejectedExpanded && (
+            <ul className="space-y-1 mt-2 overflow-y-auto" style={{ maxHeight: "12rem" }}>
+              {rejected.map((r) => (
+                <DecidedRow key={r.key} record={r} onUndo={undoDecision} />
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       {/* Summary footer */}
       <div className="px-6 py-4 flex items-center justify-between gap-4"
@@ -252,14 +424,22 @@ export default function BatchApproval({ results, onSaved, onDismiss }: Props) {
 interface FileGroupProps {
   fileName: string;
   records: BatchRecord[];
+  approvedCount: number;
+  totalCount: number;
+  exiting: Set<string>;
   onApproval: (key: string, state: "approved" | "rejected") => void;
   onUpdate: (key: string, patch: Partial<ExtractedWinRecord>) => void;
 }
 
-function FileGroup({ fileName, records, onApproval, onUpdate }: FileGroupProps) {
-  const approvedCount = records.filter((r) => r.approval === "approved").length;
-  const totalCount = records.length;
-
+function FileGroup({
+  fileName,
+  records,
+  approvedCount,
+  totalCount,
+  exiting,
+  onApproval,
+  onUpdate,
+}: FileGroupProps) {
   return (
     <div>
       <div className="flex items-center gap-3 px-6 py-3"
@@ -281,6 +461,7 @@ function FileGroup({ fileName, records, onApproval, onUpdate }: FileGroupProps) 
           <RecordCard
             key={record.key}
             record={record}
+            isExiting={exiting.has(record.key)}
             onApproval={onApproval}
             onUpdate={onUpdate}
           />
@@ -295,11 +476,12 @@ function FileGroup({ fileName, records, onApproval, onUpdate }: FileGroupProps) 
 // ------------------------------------------------------------
 interface RecordCardProps {
   record: BatchRecord;
+  isExiting: boolean;
   onApproval: (key: string, state: "approved" | "rejected") => void;
   onUpdate: (key: string, patch: Partial<ExtractedWinRecord>) => void;
 }
 
-function RecordCard({ record, onApproval, onUpdate }: RecordCardProps) {
+function RecordCard({ record, isExiting, onApproval, onUpdate }: RecordCardProps) {
   const { key, edited, approval, extracted } = record;
   const isLowConfidence = extracted.confidence === "low";
   const isMediumConfidence = extracted.confidence === "medium";
@@ -318,7 +500,15 @@ function RecordCard({ record, onApproval, onUpdate }: RecordCardProps) {
 
   return (
     <div className="rounded-xl p-4 space-y-3"
-      style={{ background: "var(--color-surface-overlay-subtle)", border: `1px solid ${borderColor}`, transition: "border-color 0.15s" }}>
+      style={{
+        background: "var(--color-surface-overlay-subtle)",
+        border: `1px solid ${borderColor}`,
+        transition: "border-color 0.15s",
+        overflow: "hidden",
+        animation: isExiting
+          ? `batchCardExit ${EXIT_MS}ms ease-out forwards`
+          : "batchCardEnter 180ms ease-out",
+      }}>
 
       {/* Confidence flag */}
       {needsReview && approval === "pending" && (
@@ -516,5 +706,34 @@ function TagEditor({ tags, onChange }: TagEditorProps) {
         style={{ width: input.length > 0 ? `${Math.max(60, input.length * 8)}px` : "50px", minWidth: "40px" }}
       />
     </div>
+  );
+}
+
+// ------------------------------------------------------------
+// DecidedRow — one approved/rejected record in an expand panel, with Undo.
+// Undo returns the record to the awaiting list (sets approval to pending).
+// ------------------------------------------------------------
+interface DecidedRowProps {
+  record: BatchRecord;
+  onUndo: (key: string) => void;
+}
+
+function DecidedRow({ record, onUndo }: DecidedRowProps) {
+  return (
+    <li
+      className="flex items-center justify-between gap-3 rounded-lg px-3 py-1.5"
+      style={{ background: "var(--color-surface-overlay-subtle)" }}
+    >
+      <span className="text-xs text-text-secondary truncate">
+        {record.edited.title || "Untitled record"}
+      </span>
+      <button
+        type="button"
+        onClick={() => onUndo(record.key)}
+        className="flex-shrink-0 text-[10px] font-semibold uppercase tracking-wide text-accent hover:opacity-80 transition-opacity"
+      >
+        Undo
+      </button>
+    </li>
   );
 }
