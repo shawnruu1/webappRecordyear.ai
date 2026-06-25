@@ -88,7 +88,7 @@ export default function DashboardClient() {
           className="mt-6 pt-6"
           style={{ borderTop: "1px solid var(--color-border-subtle)" }}
         >
-          <FileUploader onResults={handleResults} />
+          <FileUploader onResults={handleResults} onSaved={handleSaved} />
         </div>
       </div>
 

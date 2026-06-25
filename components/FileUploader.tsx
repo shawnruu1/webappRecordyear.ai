@@ -1,7 +1,13 @@
 "use client";
 
 import { useRef, useState, useCallback } from "react";
-import type { FileExtractionResult } from "@/types";
+import { WIN_CATEGORIES } from "@/types";
+import type {
+  FileExtractionResult,
+  BatchRecord,
+  ExtractedWinRecord,
+  WinCategory,
+} from "@/types";
 
 // ------------------------------------------------------------
 // Config
@@ -31,6 +37,17 @@ interface FileEntry {
 
 interface Props {
   onResults: (results: FileExtractionResult[]) => void;
+  // Fired after the "just save as evidence" path saves — reuses the parent's
+  // success toast, same as a batch-approval save.
+  onSaved?: (count: number) => void;
+}
+
+// A file staged at the choice gate, with its evidence-path title/type.
+interface PendingFile {
+  id: string;
+  file: File;
+  title: string;
+  category: WinCategory;
 }
 
 // ------------------------------------------------------------
@@ -59,14 +76,21 @@ function formatSize(bytes: number): string {
 // ------------------------------------------------------------
 // Component
 // ------------------------------------------------------------
-export default function FileUploader({ onResults }: Props) {
+export default function FileUploader({ onResults, onSaved }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [entries, setEntries] = useState<FileEntry[]>([]);
   const [isDragging, setIsDragging] = useState(false);
 
-  // ----- File ingestion -----
+  // Choice-gate state. On drop we STAGE files (no auto-run) and ask what to do:
+  // extract wins (existing flow) or just save as evidence (no AI).
+  const [pending, setPending] = useState<PendingFile[]>([]);
+  const [mode, setMode] = useState<"idle" | "choosing" | "evidence">("idle");
+  const [evidenceSaving, setEvidenceSaving] = useState(false);
+  const [evidenceError, setEvidenceError] = useState<string | null>(null);
+
+  // ----- File ingestion: stage the files and show the choice gate -----
   const addFiles = useCallback((incoming: File[]) => {
-    const newEntries: FileEntry[] = [];
+    const valid: PendingFile[] = [];
     const rejections: string[] = [];
 
     for (const file of incoming) {
@@ -74,13 +98,18 @@ export default function FileUploader({ onResults }: Props) {
       if (err) {
         rejections.push(err);
       } else {
-        newEntries.push({ file, id: uid(), status: "queued", error: null, result: null });
+        valid.push({
+          id: uid(),
+          file,
+          title: file.name.replace(/\.[^.]+$/, ""),
+          category: "Milestone",
+        });
       }
     }
 
-    if (newEntries.length > 0) {
-      setEntries((prev) => [...prev, ...newEntries]);
-      uploadAll(newEntries);
+    if (valid.length > 0) {
+      setPending((prev) => [...prev, ...valid]);
+      setMode((m) => (m === "evidence" ? "evidence" : "choosing"));
     }
 
     // Surface validation errors immediately as non-blocking entries
@@ -94,7 +123,118 @@ export default function FileUploader({ onResults }: Props) {
       }));
       setEntries((prev) => [...prev, ...errorEntries]);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Primary choice — run the existing extraction flow on the staged files.
+  function chooseExtraction() {
+    const newEntries: FileEntry[] = pending.map((p) => ({
+      file: p.file,
+      id: uid(),
+      status: "queued",
+      error: null,
+      result: null,
+    }));
+    setEntries((prev) => [...prev, ...newEntries]);
+    setPending([]);
+    setMode("idle");
+    uploadAll(newEntries);
+  }
+
+  // Secondary choice — collect title/type, then save as evidence.
+  function chooseEvidence() {
+    setEvidenceError(null);
+    setMode("evidence");
+  }
+
+  function cancelChoice() {
+    setPending([]);
+    setMode("idle");
+    setEvidenceError(null);
+  }
+
+  function updatePending(
+    id: string,
+    patch: Partial<Omit<PendingFile, "id" | "file">>
+  ) {
+    setPending((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
+  }
+
+  // Store each file as evidence (skip extraction), then create one approved
+  // artifact-backed record per file via the EXISTING batch-save path. The
+  // record carries source_file + source_hash, so saveApprovedWins labels it
+  // verification.source = "artifact" → "With evidence" (never "verified").
+  async function saveEvidence() {
+    if (pending.some((p) => !p.title.trim())) {
+      setEvidenceError("Give each file a title before saving.");
+      return;
+    }
+    setEvidenceSaving(true);
+    setEvidenceError(null);
+
+    try {
+      const records: BatchRecord[] = [];
+      for (const p of pending) {
+        const fd = new FormData();
+        fd.append("file", p.file);
+        fd.append("mode", "evidence");
+
+        const res = await fetch("/api/wins/upload", { method: "POST", body: fd });
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          setEvidenceError(body.error ?? `Upload failed (${res.status})`);
+          setEvidenceSaving(false);
+          return;
+        }
+        const { source_file, source_hash } = (await res.json()) as {
+          source_file: string;
+          source_hash: string;
+        };
+
+        const rec: ExtractedWinRecord = {
+          title: p.title.trim(),
+          category: p.category,
+          impact: "",
+          tags: [],
+          arr_amount: null,
+          happened_at: null,
+          raw_excerpt: "",
+          confidence: "high",
+        };
+        records.push({
+          key: uid(),
+          extracted: rec,
+          edited: rec,
+          approval: "approved",
+          sourceFileName: p.file.name,
+          source_file,
+          source_hash,
+        });
+      }
+
+      const saveRes = await fetch("/api/wins/batch-save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ records }),
+      });
+      if (!saveRes.ok) {
+        const body = await saveRes.json().catch(() => ({}));
+        setEvidenceError(body.error ?? "Save failed. Try again.");
+        setEvidenceSaving(false);
+        return;
+      }
+
+      const { saved } = (await saveRes.json()) as { saved: number };
+      setPending([]);
+      setMode("idle");
+      setEvidenceSaving(false);
+      onSaved?.(saved);
+    } catch {
+      setEvidenceError(
+        "We couldn't reach the server. Check your connection and try again."
+      );
+      setEvidenceSaving(false);
+    }
+  }
 
   // ----- Upload + extract -----
   async function uploadAll(toUpload: FileEntry[]) {
@@ -226,7 +366,7 @@ export default function FileUploader({ onResults }: Props) {
         <p className="text-xs text-text-tertiary text-center">
           <span className="text-accent font-semibold">Click to upload</span> or drag and drop
         </p>
-        <p className="text-[10px] text-text-faint">PNG, JPG, WEBP, PDF · Max 10MB per file</p>
+        <p className="text-[10px] text-text-faint">PNG, JPG, WEBP, PDF · Max 3.5MB per file</p>
 
         <input
           ref={inputRef}
@@ -238,6 +378,144 @@ export default function FileUploader({ onResults }: Props) {
           aria-label="Upload files"
         />
       </div>
+
+      {/* Choice gate — appears after staging, before anything runs */}
+      {mode === "choosing" && pending.length > 0 && (
+        <div
+          className="mt-4 rounded-xl p-4"
+          style={{
+            background: "var(--color-surface-overlay-subtle)",
+            border: "1px solid var(--color-border-subtle)",
+          }}
+        >
+          <p className="text-sm font-semibold text-text-primary">
+            What should we do with this?
+          </p>
+          <p className="text-[11px] text-text-tertiary mt-0.5 truncate">
+            {pending.length === 1 ? pending[0].file.name : `${pending.length} files`}
+          </p>
+
+          <div className="mt-3 space-y-2">
+            {/* Primary — emphasized */}
+            <button
+              type="button"
+              onClick={chooseExtraction}
+              className="w-full text-left rounded-xl px-4 py-3 transition-opacity hover:opacity-90"
+              style={{ background: "var(--color-accent)", color: "var(--color-surface-base)" }}
+            >
+              <span className="block text-sm font-bold">Find my wins in it</span>
+              <span className="block text-[11px] mt-0.5 opacity-90">
+                AI reads it and pulls out deals, recognition, and milestones.
+              </span>
+            </button>
+
+            {/* Secondary — lighter, clearly available */}
+            <button
+              type="button"
+              onClick={chooseEvidence}
+              className="w-full text-left rounded-xl px-4 py-3 transition-colors hover:opacity-90"
+              style={{
+                background: "var(--color-surface-overlay)",
+                border: "1px solid var(--color-border-strong)",
+              }}
+            >
+              <span className="block text-sm font-semibold text-text-primary">
+                Just save it as evidence
+              </span>
+              <span className="block text-[11px] mt-0.5 text-text-tertiary">
+                For things like your offer letter or comp plan. Kept on file for reference, not counted as a win.
+              </span>
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={cancelChoice}
+            className="mt-2 text-[11px] text-text-faint hover:text-text-tertiary transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+
+      {/* Evidence form — title + record type per file, then save (no AI) */}
+      {mode === "evidence" && pending.length > 0 && (
+        <div
+          className="mt-4 rounded-xl p-4 space-y-3"
+          style={{
+            background: "var(--color-surface-overlay-subtle)",
+            border: "1px solid var(--color-border-subtle)",
+          }}
+        >
+          <div>
+            <p className="text-sm font-semibold text-text-primary">Save as evidence</p>
+            <p className="text-[11px] text-text-tertiary mt-0.5">
+              Kept on file and labeled &ldquo;With evidence.&rdquo; Not parsed or counted as a win.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {pending.map((p) => (
+              <div
+                key={p.id}
+                className="rounded-lg p-3 space-y-2"
+                style={{
+                  background: "var(--color-surface-overlay-subtle)",
+                  border: "1px solid var(--color-border-subtle)",
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <FileTypeIcon mimeType={p.file.type} />
+                  <span className="text-xs text-text-secondary truncate flex-1">{p.file.name}</span>
+                </div>
+                <input
+                  type="text"
+                  value={p.title}
+                  onChange={(e) => updatePending(p.id, { title: e.target.value })}
+                  maxLength={80}
+                  placeholder="Title (e.g. Offer letter — Acme)"
+                  className="w-full text-sm text-text-primary rounded-lg px-2.5 py-1.5 bg-[var(--color-surface-overlay)] border border-[var(--color-border-strong)] transition-colors focus:outline-none focus:border-[var(--color-accent)] focus:ring-2 focus:ring-accent/40"
+                />
+                <select
+                  value={p.category}
+                  onChange={(e) => updatePending(p.id, { category: e.target.value as WinCategory })}
+                  className="w-full text-xs text-text-primary rounded-lg px-2 py-1.5 border border-[var(--color-border-strong)] transition-colors focus:outline-none focus:border-[var(--color-accent)] focus:ring-2 focus:ring-accent/40"
+                  style={{ background: "var(--color-surface-raised)" }}
+                >
+                  {WIN_CATEGORIES.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+            ))}
+          </div>
+
+          {evidenceError && <p className="text-xs text-danger-soft">{evidenceError}</p>}
+
+          <div className="flex items-center justify-end gap-3">
+            <button
+              type="button"
+              onClick={cancelChoice}
+              className="text-xs text-text-faint hover:text-text-tertiary transition-colors px-2 py-2"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={saveEvidence}
+              disabled={evidenceSaving}
+              className="px-5 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-90 disabled:opacity-40"
+              style={{ background: "var(--color-accent)", color: "var(--color-surface-base)" }}
+            >
+              {evidenceSaving
+                ? "Saving…"
+                : pending.length === 1
+                ? "Save as evidence"
+                : `Save ${pending.length} as evidence`}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* File list */}
       {hasEntries && (

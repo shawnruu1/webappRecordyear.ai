@@ -59,6 +59,10 @@ export async function POST(request: Request) {
     );
   }
 
+  // mode='evidence' → store the file but skip AI extraction (the "just save as
+  // evidence" path). The record is created separately via /api/wins/batch-save.
+  const isEvidenceOnly = formData.get("mode") === "evidence";
+
   // ---- Validate type ----
   if (!ACCEPTED_TYPES.has(fileEntry.type)) {
     return NextResponse.json(
@@ -108,6 +112,18 @@ export async function POST(request: Request) {
       { error: `File upload failed: ${uploadError.message}` },
       { status: 500 }
     );
+  }
+
+  // ---- Evidence-only path: file is stored, skip extraction ----
+  // Return the storage path + hash so the client can create an
+  // artifact-backed record via /api/wins/batch-save. Unlike the empty/failure
+  // paths below, we do NOT delete the file here — keeping it IS the point.
+  if (isEvidenceOnly) {
+    return NextResponse.json({
+      source_file: storagePath,
+      source_hash: sourceHash,
+      fileName: fileEntry.name,
+    });
   }
 
   // ---- Look up role + name for extraction context (best-effort) ----
