@@ -6,7 +6,10 @@ import type { FileExtractionResult } from "@/types";
 // ------------------------------------------------------------
 // Config
 // ------------------------------------------------------------
-const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
+// Matches the server + extractor limit. 3.5MB raw stays under Anthropic's
+// ~5MB per-image vision cap (after base64 inflation) and Vercel's route body
+// limit, so files that pass here actually make it through end-to-end.
+const MAX_FILE_SIZE_BYTES = Math.floor(3.5 * 1024 * 1024); // 3.5MB
 const ACCEPTED_MIME_TYPES = [
   "image/png",
   "image/jpeg",
@@ -42,7 +45,7 @@ function validateFile(file: File): string | null {
     return `${file.name}: unsupported type. Use PNG, JPG, WEBP, or PDF.`;
   }
   if (file.size > MAX_FILE_SIZE_BYTES) {
-    return `${file.name}: file too large. Max 10MB. Try compressing or splitting it.`;
+    return `${file.name}: file too large. Max 3.5MB. Upload a smaller or cropped version.`;
   }
   return null;
 }
@@ -263,8 +266,10 @@ export default function FileUploader({ onResults }: Props) {
       {allDone && (
         <div className="mt-4 pt-4" style={{ borderTop: "1px solid var(--color-border-subtle)" }}>
           <p className="text-[11px] text-text-tertiary">
-            {entries.filter((e) => e.status === "done" && (e.result?.records.length ?? 0) > 0).length > 0
+            {entries.some((e) => e.status === "done" && (e.result?.records.length ?? 0) > 0)
               ? "Review extracted records below before saving."
+              : entries.some((e) => e.result?.status === "unreadable")
+              ? "We couldn't read that automatically. Add the details using the text box above."
               : "No records were found. Try a different file or log one manually above."}
           </p>
         </div>
@@ -317,7 +322,12 @@ function FileRow({ entry, onRemove, onRetry }: FileRowProps) {
                   · {result.records.length} record{result.records.length === 1 ? "" : "s"} found
                 </span>
               )}
-              {status === "done" && result && result.records.length === 0 && (
+              {status === "done" && result && result.records.length === 0 && result.status === "unreadable" && (
+                <span className="ml-2" style={{ color: "var(--color-warning)" }}>
+                  · Couldn&rsquo;t read automatically — log it manually
+                </span>
+              )}
+              {status === "done" && result && result.records.length === 0 && result.status !== "unreadable" && (
                 <span className="ml-2 text-text-tertiary">· No records found</span>
               )}
             </p>

@@ -1,8 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { ExtractedWinRecord, WinCategory } from "@/types";
-import { WIN_CATEGORIES } from "@/types";
+import type { ExtractedWinRecord } from "@/types";
 import { buildWinExtractionPrompt } from "@/lib/ai/buildExtractionPrompt";
-import { enforceArrAmbiguity } from "@/lib/ai/arrAmbiguity";
+import { parseExtractionResponse } from "@/lib/ai/parseExtractionResponse";
 import {
   logAICall,
   classifyAIError,
@@ -13,6 +12,17 @@ import {
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const MODEL = "claude-sonnet-4-6";
+
+// Output cap. Large multi-row screenshots produce long JSON arrays; 4096 was
+// truncating them mid-stream and breaking the parse. 16384 comfortably fits a
+// far larger table than any single screenshot, well within Sonnet's limit.
+const MAX_OUTPUT_TOKENS = 16384;
+
+// Keep the model call inside the route's time budget (maxDuration = 60s) so a
+// slow extraction surfaces as a clean, catchable timeout rather than a
+// platform 504. One retry max, so retries don't compound past the budget.
+const AI_REQUEST_TIMEOUT_MS = 55_000;
+const AI_MAX_RETRIES = 1;
 
 type SupportedImageMediaType = "image/png" | "image/jpeg" | "image/webp";
 
@@ -26,59 +36,6 @@ function isSupportedImageType(
   mimeType: string
 ): mimeType is SupportedImageMediaType {
   return SUPPORTED_TYPES.includes(mimeType as SupportedImageMediaType);
-}
-
-function parseResponse(raw: string): ExtractedWinRecord[] {
-  const cleaned = raw.replace(/```(?:json)?\n?/g, "").trim();
-  const parsed: unknown = JSON.parse(cleaned);
-
-  if (!Array.isArray(parsed)) return [];
-
-  return parsed.filter(isValidRecord).map(normalizeRecord);
-}
-
-function isValidRecord(item: unknown): item is Record<string, unknown> {
-  if (!item || typeof item !== "object") return false;
-  const r = item as Record<string, unknown>;
-  return (
-    typeof r.title === "string" &&
-    typeof r.category === "string" &&
-    typeof r.impact === "string"
-  );
-}
-
-function normalizeRecord(item: Record<string, unknown>): ExtractedWinRecord {
-  const category = WIN_CATEGORIES.includes(item.category as WinCategory)
-    ? (item.category as WinCategory)
-    : "Milestone";
-
-  const rawArr = item.arr_amount;
-  const arr_amount =
-    typeof rawArr === "number"
-      ? Math.round(rawArr)
-      : typeof rawArr === "string"
-      ? Math.round(parseFloat(String(rawArr).replace(/[^0-9.]/g, ""))) || null
-      : null;
-
-  return enforceArrAmbiguity({
-    title: String(item.title).slice(0, 60),
-    category,
-    impact: String(item.impact),
-    tags: Array.isArray(item.tags)
-      ? (item.tags as unknown[])
-          .filter((t): t is string => typeof t === "string")
-          .slice(0, 5)
-      : [],
-    arr_amount,
-    happened_at:
-      typeof item.happened_at === "string" ? item.happened_at : null,
-    raw_excerpt:
-      typeof item.raw_excerpt === "string" ? item.raw_excerpt : "",
-    confidence:
-      item.confidence === "high" || item.confidence === "low"
-        ? item.confidence
-        : "medium",
-  });
 }
 
 export async function extractWinsFromImage(
@@ -98,34 +55,39 @@ export async function extractWinsFromImage(
   try {
     const base64Data = buffer.toString("base64");
 
-    const message = await anthropic.messages.create({
-      model: MODEL,
-      max_tokens: 4096,
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "image",
-              source: {
-                type: "base64",
-                media_type: mimeType,
-                data: base64Data,
+    const message = await anthropic.messages.create(
+      {
+        model: MODEL,
+        max_tokens: MAX_OUTPUT_TOKENS,
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "image",
+                source: {
+                  type: "base64",
+                  media_type: mimeType,
+                  data: base64Data,
+                },
               },
-            },
-            {
-              type: "text",
-              text: buildWinExtractionPrompt({ sourceType: "image" }),
-            },
-          ],
-        },
-      ],
-    });
+              {
+                type: "text",
+                text: buildWinExtractionPrompt({ sourceType: "image" }),
+              },
+            ],
+          },
+        ],
+      },
+      { timeout: AI_REQUEST_TIMEOUT_MS, maxRetries: AI_MAX_RETRIES }
+    );
 
     usage = message.usage;
     const raw =
-      message.content[0].type === "text" ? message.content[0].text : "";
-    const result = parseResponse(raw); // may throw on malformed JSON
+      message.content[0]?.type === "text" ? message.content[0].text : "";
+    // Salvages truncated/partial output; throws ExtractionParseError only when
+    // nothing is recoverable (caller degrades to manual entry).
+    const result = parseExtractionResponse(raw);
 
     logAICall({
       extraction_id,

@@ -288,6 +288,7 @@ export type ExtractionStatus =
   | "processing"
   | "success"
   | "empty" // AI found no records
+  | "unreadable" // Output couldn't be parsed/salvaged — recoverable via manual entry
   | "failed" // Unrecoverable error
   | "queued"; // Anthropic API down — stored for retry
 

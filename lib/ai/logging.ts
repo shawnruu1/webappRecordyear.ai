@@ -52,8 +52,12 @@ export function newExtractionId(): string {
 export function classifyAIError(err: unknown): AIErrorClass {
   if (err instanceof Anthropic.RateLimitError) return "rate_limit";
   if (err instanceof Anthropic.APIConnectionTimeoutError) return "timeout";
-  // JSON.parse on a malformed model response throws SyntaxError.
+  // JSON.parse on a malformed model response throws SyntaxError; the shared
+  // parser throws ExtractionParseError (by name) when salvage also fails.
   if (err instanceof SyntaxError) return "parse_failure";
+  if ((err as { name?: string })?.name === "ExtractionParseError") {
+    return "parse_failure";
+  }
 
   if (err instanceof Anthropic.APIError && err.status === 429) {
     return "rate_limit";
