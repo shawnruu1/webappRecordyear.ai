@@ -456,7 +456,7 @@ function FileGroup({
           {approvedCount}/{totalCount} approved
         </span>
       </div>
-      <div className="px-4 pb-4 space-y-3 pt-1">
+      <div className="px-4 pb-4 space-y-4 pt-1">
         {records.map((record) => (
           <RecordCard
             key={record.key}
@@ -487,23 +487,29 @@ function RecordCard({ record, isExiting, onApproval, onUpdate }: RecordCardProps
   const isMediumConfidence = extracted.confidence === "medium";
   const needsReview = isLowConfidence || isMediumConfidence;
 
-  const borderColor =
-    approval === "approved"
-      ? "color-mix(in srgb, var(--color-success) 30%, transparent)"
-      : approval === "rejected"
-      ? "color-mix(in srgb, var(--color-danger) 20%, transparent)"
-      : needsReview
-      ? isLowConfidence
-        ? "color-mix(in srgb, var(--color-danger) 30%, transparent)"
-        : "color-mix(in srgb, var(--color-warning) 30%, transparent)"
-      : "var(--color-border-subtle)";
+  // Card-level state treatment — the whole container reads as flagged or calm
+  // before any text is read. Confident cards stay on the plain raised surface.
+  let cardBorder = "var(--color-border-default)";
+  let cardBg = "var(--color-surface-raised)";
+  if (approval === "approved") {
+    cardBorder = "color-mix(in srgb, var(--color-success) 35%, transparent)";
+  } else if (approval === "rejected") {
+    cardBorder = "color-mix(in srgb, var(--color-danger) 25%, transparent)";
+  } else if (isLowConfidence) {
+    cardBorder = "color-mix(in srgb, var(--color-danger) 40%, transparent)";
+    cardBg = "color-mix(in srgb, var(--color-danger) 7%, var(--color-surface-raised))";
+  } else if (isMediumConfidence) {
+    cardBorder = "color-mix(in srgb, var(--color-warning) 35%, transparent)";
+    cardBg = "color-mix(in srgb, var(--color-warning) 5%, var(--color-surface-raised))";
+  }
 
   return (
-    <div className="rounded-xl p-4 space-y-3"
+    <div className="rounded-2xl p-4 space-y-3"
       style={{
-        background: "var(--color-surface-overlay-subtle)",
-        border: `1px solid ${borderColor}`,
-        transition: "border-color 0.15s",
+        background: cardBg,
+        border: `1px solid ${cardBorder}`,
+        boxShadow: "var(--shadow-soft)",
+        transition: "border-color 0.15s, background-color 0.15s",
         overflow: "hidden",
         animation: isExiting
           ? `batchCardExit ${EXIT_MS}ms ease-out forwards`
@@ -545,7 +551,7 @@ function RecordCard({ record, isExiting, onApproval, onUpdate }: RecordCardProps
           value={edited.title}
           onChange={(e) => onUpdate(key, { title: e.target.value })}
           maxLength={80}
-          className="flex-1 text-sm font-semibold text-text-primary rounded-lg px-2.5 py-1.5 border border-transparent bg-transparent transition-colors hover:bg-[var(--color-surface-overlay-subtle)] focus:outline-none focus:bg-[var(--color-surface-overlay)] focus:border-[var(--color-border-strong)] focus:ring-2 focus:ring-accent/30"
+          className="flex-1 text-base font-semibold text-text-primary rounded-lg px-2.5 py-1.5 border border-transparent bg-transparent transition-colors hover:bg-[var(--color-surface-overlay-subtle)] focus:outline-none focus:bg-[var(--color-surface-overlay)] focus:border-[var(--color-border-strong)] focus:ring-2 focus:ring-accent/30"
           placeholder="Title"
         />
         <select
